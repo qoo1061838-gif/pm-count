@@ -1,0 +1,444 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PM Pasta 點貨台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+:root{
+  --bg:#FAF7F2; --card:#FFFFFF; --ink:#26211C; --sub:#7A7168; --line:#E7E0D6;
+  --accent:#C4392E; --accent-ink:#FFFFFF; --accent-soft:#F7E3E0;
+  --ok:#2E7D46; --ok-soft:#E3F0E7; --warn:#C06A10; --warn-soft:#F8EAD8;
+  --info:#3B6FB5; --info-soft:#E4ECF7; --pend:#8A6D00; --pend-soft:#F5EDCB;
+  --input:#FFFFFF; --input-line:#CFC6B8;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1713; --card:#26211B; --ink:#EDE7DE; --sub:#A79C8F; --line:#3A332B;
+    --accent:#E0584A; --accent-ink:#FFFFFF; --accent-soft:#45231F;
+    --ok:#6FBF87; --ok-soft:#22382A; --warn:#E0993F; --warn-soft:#3E2F1B;
+    --info:#82A9DB; --info-soft:#243348; --pend:#D9C05A; --pend-soft:#3B341A;
+    --input:#2E2822; --input-line:#55493C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1713; --card:#26211B; --ink:#EDE7DE; --sub:#A79C8F; --line:#3A332B;
+  --accent:#E0584A; --accent-ink:#FFFFFF; --accent-soft:#45231F;
+  --ok:#6FBF87; --ok-soft:#22382A; --warn:#E0993F; --warn-soft:#3E2F1B;
+  --info:#82A9DB; --info-soft:#243348; --pend:#D9C05A; --pend-soft:#3B341A;
+  --input:#2E2822; --input-line:#55493C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:16px;line-height:1.55}
+.app{max-width:440px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+header.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 10px;display:flex;align-items:baseline;gap:10px}
+.brand{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px}
+.brand em{color:var(--accent);font-style:normal}
+.store{font-size:13px;color:var(--sub);letter-spacing:.06em}
+.proto{margin-left:auto;font-size:11px;color:var(--pend);background:var(--pend-soft);border-radius:4px;padding:2px 7px;letter-spacing:.08em}
+main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.datecard{display:flex;align-items:center;gap:14px}
+.datebig{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.dateinfo{font-size:13px;color:var(--sub)}
+.dow{font-size:17px;font-weight:700}
+.toggle{margin-left:auto;text-align:right;font-size:12px;color:var(--sub)}
+.toggle button{margin-top:4px;border:1px solid var(--input-line);background:var(--input);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer}
+.toggle button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.week{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.day{min-width:52px;flex:1;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:7px 4px;text-align:center;font-size:11px;color:var(--sub)}
+.day b{display:block;font-size:14px;color:var(--ink)}
+.day .n{font-variant-numeric:tabular-nums;font-size:12px;margin-top:2px;display:block}
+.day.today{border-color:var(--accent);background:var(--accent-soft)}
+.day.today b{color:var(--accent)}
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.pinput{height:48px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);font-family:inherit;font-size:18px;font-weight:700;padding:0 14px;width:100%}
+.pinput::placeholder{color:var(--input-line);font-weight:400;font-size:15px}
+.pinput:focus{outline:none;border-color:var(--accent)}
+/* 每日點貨紀錄 */
+.hd{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:8px;font-size:15px}
+.hpersons{font-size:13px;color:var(--sub)}
+.hv{padding:9px 0;border-bottom:1px dashed var(--line)}
+.hv:last-child{border-bottom:none}
+.hvn{font-weight:700;font-size:14px;color:var(--accent);margin-bottom:3px}
+.hitem{display:flex;gap:10px;align-items:baseline;font-size:14px;padding:3px 0}
+.hitem>span:first-child{flex:1;min-width:0;font-weight:500}
+.hstock{color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hres{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.hres.dim{color:var(--sub);font-weight:400}
+.hby{font-size:12px;color:var(--info);white-space:nowrap}
+.chip{border:1px solid var(--input-line);background:var(--input);color:var(--ink);border-radius:999px;padding:7px 16px;font-size:15px;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.vrow{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.vrow:last-child{border-bottom:none}
+.vrow.off{opacity:.45;cursor:default}
+.vname{font-weight:700;font-size:16px}
+.vnote{font-size:12px;color:var(--sub)}
+.vstat{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--sub);text-align:right;white-space:nowrap}
+.vstat .done{color:var(--ok);font-weight:700}
+.arrow{color:var(--sub)}
+.badge{font-size:11px;border-radius:4px;padding:1px 6px}
+.b-rest{background:var(--line);color:var(--sub)}
+.b-order{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.note{font-size:12.5px;color:var(--sub);line-height:1.6}
+.note b{color:var(--pend)}
+.cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
+.cta:disabled{opacity:.4}
+.ghost{display:block;width:100%;border:1px solid var(--input-line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;font-size:15px;padding:12px;cursor:pointer}
+/* vendor page */
+.vhead{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px}
+.back{border:none;background:none;color:var(--accent);font-size:15px;font-family:inherit;cursor:pointer;padding:4px 6px 4px 0;font-weight:700}
+.vhead .t{font-weight:700;font-size:17px}
+.vhead .d{font-size:12px;color:var(--sub)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.itop{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.itop .result{justify-self:end;margin-left:0}
+.itop>input{justify-self:end}
+.item .row1{min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.iname{font-weight:700;font-size:20px}
+.iunit{font-size:14px;color:var(--sub)}
+.tag{font-size:13px;border-radius:5px;padding:2px 9px;font-weight:700}
+.t-par{background:var(--ok-soft);color:var(--ok)}
+.t-trig{background:var(--warn-soft);color:var(--warn)}
+.t-spec{background:var(--info-soft);color:var(--info)}
+.t-pend{background:var(--pend-soft);color:var(--pend)}
+.irule{font-size:16px;color:var(--ink);opacity:.88;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row2{display:flex;align-items:center;gap:10px}
+.stock{display:flex;align-items:center;gap:0;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);overflow:hidden}
+.stock button{width:36px;height:36px;border:none;background:none;color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;font-family:inherit}
+.stock input{width:48px;height:36px;border:none;background:none;color:var(--ink);text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
+.stock input:focus{outline:none}
+.stock input::placeholder{color:var(--input-line);font-weight:400;font-size:14px}
+.result{margin-left:auto;text-align:right;font-size:13px;color:var(--sub)}
+.result b{display:block;font-size:17px;color:var(--ink)}
+.result.order b{color:var(--accent)}
+.result.zero b{color:var(--ok)}
+.sw{display:flex;align-items:center;gap:8px;font-size:14px}
+.sw button{width:52px;height:30px;border-radius:999px;border:1.5px solid var(--input-line);background:var(--input);cursor:pointer;position:relative}
+.sw button::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sub);transition:left .15s}
+.sw button.on{background:var(--accent);border-color:var(--accent)}
+.sw button.on::after{left:26px;background:#fff}
+.bottom{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+/* summary */
+.msg{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.msg .mh{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700}
+.copy{margin-left:auto;border:1px solid var(--input-line);border-radius:8px;background:var(--input);color:var(--ink);font-family:inherit;font-size:13px;padding:6px 14px;cursor:pointer}
+.copy.done{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.msg pre{margin:0;padding:12px 14px;font-family:inherit;font-size:14.5px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
+.empty{color:var(--sub);font-size:14px;padding:12px 14px}
+footer{padding:8px 16px 24px;font-size:11.5px;color:var(--sub);line-height:1.7}
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+// ---------- 資料(來源:PM_Pasta_永和店_叫貨規則_優化版.xlsx)----------
+// type: par=補到滿  trig=碰到設定庫存  spec=特殊(綁定/混搭)
+// th: 觸發門檻(數字,單位=stockUnit或unit)  cmp: 'lt'低於 / 'le'剩  oq: 一次叫的文字
+const VENDORS=[
+ {id:'shen',name:'申崧',sched:[1,2,3,4,5],red:true,note:'休六、日;見紅休',items:[
+  {n:'培根',u:'包',type:'par',par:10},
+  {n:'番茄罐頭',u:'罐',type:'par',par:8},
+  {n:'黃金調和油',u:'罐',type:'trig',th:0.18,cmp:'le',oq:'1 罐',rule:'剩500ml才叫(1罐=2.8L,約0.2罐)'},
+  {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
+  {n:'金山辣椒醬',u:'罐',type:'par',par:2},
+ ]},
+ {id:'chang',name:'昶翔',sched:[1,4],red:true,note:'一、四送貨;見紅休',items:[
+  {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
+  {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
+ ]},
+ {id:'wan',name:'萬堡莊',sched:[1,2,3,4,5],red:true,note:'休六、日;見紅休',items:[
+  {n:'橄欖油',u:'罐',type:'trig',th:1,cmp:'le',oq:'1 箱',rule:'剩1罐 → 叫1箱(=4罐)'},
+  {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
+  {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
+ ]},
+ {id:'kai',name:'開元',sched:[1,4],red:false,note:'一、四送貨',items:[
+  {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
+  {n:'法國長棍',u:'包',type:'par',par:3},
+ ]},
+ {id:'le',name:'樂沛',sched:[2,4,6],red:true,note:'二、四、六送貨;休三、日;見紅休',items:[
+  {n:'薯條(包好的)',u:'袋',type:'trig',th:1.5,cmp:'le',oq:'1 箱',rule:'剩1.5袋 → 叫1箱(=3袋)',pend:'修正待確認:改剩2.5袋'},
+  {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
+ ]},
+ {id:'mei',name:'美食家',sched:[1,2,3,4,5,6],red:true,note:'休假日;見紅休(週日休:待確認)',items:[
+  {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
+  {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
+  {n:'保鮮膜',u:'條',type:'par',par:2},
+  {n:'錫箔紙',u:'條',type:'par',par:1},
+  {n:'紹興酒',u:'罐',type:'par',par:3},
+  {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
+ ]},
+ {id:'bao',name:'寶綠',sched:[0,1,2,3,4,5,6],red:true,note:'見紅休(點貨日:待確認)',items:[
+  {n:'凝膜紙',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
+  {n:'麵包袋',u:'捆',type:'par',par:1},
+  {n:'除油林',u:'罐',type:'par',par:1},
+  {n:'大六兩袋',u:'包',type:'par',par:3},
+  {n:'洗碗精',u:'箱',type:'par',par:1},
+  {n:'漂白水',u:'罐',type:'par',par:1},
+  {n:'無題把半斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把1斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把3斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
+ ]},
+ {id:'guo',name:'國豐',sched:[0,1,2,3,4,5,6],red:true,note:'見紅休(點貨日:待確認)',items:[
+  {n:'粗辣椒粉',u:'包',type:'par',par:2},
+  {n:'細辣椒粉',u:'包',type:'par',par:2},
+  {n:'蒜頭酥',u:'包',type:'par',par:1},
+  {n:'鹽巴',u:'包',type:'par',par:3},
+  {n:'梅林',u:'罐',type:'par',par:4},
+  {n:'泰國魚露',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'紅花檸檬汁',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'玉米粒',u:'罐',type:'par',par:10},
+  {n:'蘑菇罐頭',u:'罐',type:'par',par:2},
+  {n:'冬菜',u:'罐',type:'par',par:1},
+  {n:'玉米粉',u:'盒',type:'par',par:9},
+  {n:'低筋麵粉',u:'袋',type:'par',par:1,rule:'5斤=1袋'},
+  {n:'白毛巾(長)',u:'條',type:'trig',th:5,cmp:'lt',oq:'1 包',rule:'低於5條 → 叫1包(=12條)'},
+  {n:'紅藜麥',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'酸豆',u:'罐',type:'par',par:2},
+  {n:'切段乾辣椒',u:'包',type:'par',par:2},
+  {n:'當歸',u:'盒',type:'trig',th:0.5,cmp:'lt',oq:'1 盒',rule:'低於0.5盒才叫'},
+  {n:'墨魚醬汁',u:'罐',type:'par',par:1},
+  {n:'焙煎胡麻醬',u:'罐',type:'par',par:1},
+  {n:'美廚蒔蘿草',u:'罐',type:'par',par:1},
+  {n:'小磨坊義大利綜合香料',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'小磨坊奧勒岡葉',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'小磨坊洋香菜葉',u:'罐',type:'par',par:1},
+  {n:'安佳無鹽奶油',u:'塊',type:'par',par:6},
+  {n:'可果美番茄醬',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'番茄糊',u:'塊',type:'trig',th:3,cmp:'lt',oq:'1 罐',rule:'低於3塊 → 叫1罐(1罐≈15塊)',pend:'修正待確認:改低於5'},
+  {n:'原粒黑胡椒',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'海綿菜瓜布',u:'包',type:'par',par:1},
+  {n:'棕刷',u:'個',type:'par',par:3},
+  {n:'Tabasco',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'雙色起士絲',u:'包',type:'par',par:4},
+ ]},
+];
+const DOW='日一二三四五六';
+
+// ---------- 狀態 ----------
+const today=new Date();
+const S={view:'home',vid:null,person:null,holiday:(today.getDay()===0||today.getDay()===6),
+ data:{}}; // data[vid][itemIndex] = {stock:number|null, on:bool, qty:string}
+VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
+try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
+ if(saved){S.person=saved.person;S.holiday=saved.holiday;Object.assign(S.data,saved.data);}}catch(e){}
+function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data}))}catch(e){};logToday()}
+// 背景紀錄:每天誰點貨(自動,寫進手機的本機儲存)
+function logbook(){try{return JSON.parse(localStorage.getItem('pmcount-log'))||{}}catch(e){return{}}}
+function logToday(){
+ if(!S.person||!S.person.trim())return;
+ const lb=logbook();
+ const k=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+ lb[k]={person:S.person.trim(),dow:DOW[today.getDay()]};
+ try{localStorage.setItem('pmcount-log',JSON.stringify(lb))}catch(e){}
+}
+
+// ---------- 計算 ----------
+function calcItem(it,st){
+ if(st.stock===null||st.stock==='')return null;
+ const s=Number(st.stock); if(isNaN(s))return null;
+ if(it.type==='par'){
+  const par=(it.parHoliday&&S.holiday)?it.parHoliday:it.par;
+  const need=Math.max(0,Math.ceil(par-s));
+  return need>0?{text:need+' '+it.u,order:true}:{text:'不用叫',order:false};
+ }
+ if(it.type==='trig'){
+  const hit=it.cmp==='le'?s<=it.th:s<it.th;
+  return hit?{text:it.oq,order:true}:{text:'不用叫',order:false};
+ }
+ return null;
+}
+function isOrderDay(v){
+ if(S.holiday&&v.red)return false;
+ return v.sched.includes(today.getDay());
+}
+function vendorProgress(v){
+ const st=S.data[v.id];let done=0,orders=0;
+ v.items.forEach((it,i)=>{
+  if(it.type==='spec'){if(st[i].on){done++;orders++}return;}
+  const r=calcItem(it,st[i]);
+  if(r){done++;if(r.order)orders++;}
+ });
+ return{done,total:v.items.filter(it=>it.type!=='spec').length,orders};
+}
+function vendorMsg(v){
+ const st=S.data[v.id];const lines=[];
+ v.items.forEach((it,i)=>{
+  if(it.type==='spec'){
+   if(st[i].on)lines.push('▸ '+it.n+' '+(st[i].qty||it.oq||'(數量待填)'));
+   return;
+  }
+  const r=calcItem(it,st[i]);
+  if(r&&r.order)lines.push('▸ '+it.n+' '+r.text);
+ });
+ if(!lines.length)return null;
+ const d=(today.getMonth()+1)+'/'+today.getDate();
+ let m='【PM Pasta 永和店 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
+ if(S.person)m+='\n點貨人:'+S.person;
+ return m;
+}
+
+// ---------- 畫面 ----------
+const app=document.getElementById('app');
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function recentNames(){
+ const lb=logbook();const seen=[];
+ Object.keys(lb).sort().reverse().forEach(k=>{const p=lb[k].person;if(p&&p!==S.person&&!seen.includes(p))seen.push(p)});
+ return seen.slice(0,4);
+}
+// 每日點貨紀錄:讀出每天存下的點貨資料(最近 30 天)
+function dayRecords(){
+ const out=[];
+ for(let i=0;i<localStorage.length;i++){
+  const k=localStorage.key(i);
+  if(!k||k.indexOf('pmcount-')!==0||k==='pmcount-log')continue;
+  const d=new Date(k.slice(8));if(isNaN(d))continue;
+  try{const rec=JSON.parse(localStorage.getItem(k));if(rec&&rec.data)out.push({d,rec})}catch(e){}
+ }
+ return out.sort((a,b)=>b.d-a.d).slice(0,30);
+}
+function renderHistory(){
+ const blocks=dayRecords().map(({d,rec})=>{
+  const persons=[];const addP=p=>{if(p&&p.trim()&&!persons.includes(p.trim()))persons.push(p.trim())};
+  addP(rec.person);
+  const vparts=[];
+  VENDORS.forEach(v=>{
+   const st=(rec.data&&rec.data[v.id])||[];
+   const lines=[];
+   v.items.forEach((it,i)=>{
+    const s=st[i];if(!s)return;
+    if(s.by)addP(s.by);
+    const by=s.by?'<span class="hby">'+esc(s.by)+'</span>':'';
+    if(it.type==='spec'){
+     if(s.on)lines.push('<div class="hitem"><span>'+esc(it.n)+'</span><span class="hres">叫 '+esc(s.qty||it.oq||'?')+'</span>'+by+'</div>');
+     return;
+    }
+    if(s.stock===null||s.stock==='')return;
+    const n=Number(s.stock);let res;
+    if(it.type==='par'){
+     const par=(it.parHoliday&&rec.holiday)?it.parHoliday:it.par;
+     const need=Math.max(0,Math.ceil(par-n));res=need>0?'叫 '+need+' '+it.u:'不用叫';
+    }else{
+     const hit=it.cmp==='le'?n<=it.th:n<it.th;res=hit?'叫 '+it.oq:'不用叫';
+    }
+    lines.push('<div class="hitem"><span>'+esc(it.n)+'</span><span class="hstock">庫存 '+esc(s.stock)+'</span><span class="hres'+(res==='不用叫'?' dim':'')+'">'+res+'</span>'+by+'</div>');
+   });
+   if(lines.length)vparts.push('<div class="hv"><div class="hvn">'+v.name+'</div>'+lines.join('')+'</div>');
+  });
+  return '<div class="card"><div class="hd"><b>'+(d.getMonth()+1)+'/'+d.getDate()+'(星期'+DOW[d.getDay()]+')</b><span class="hpersons">'+esc(persons.join('、')||'沒記名字')+'</span></div>'+
+   (vparts.length?vparts.join(''):'<div class="empty" style="padding:8px 0">這天沒有點貨資料</div>')+'</div>';
+ }).join('');
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">每日點貨紀錄</div><div class="d">自動保存;每筆都標誰輸入的(正式系統會存雲端)</div></div></div>'+
+  '<main>'+(blocks||'<div class="card empty">還沒有任何紀錄,點過貨就會自動出現</div>')+'</main>';
+ document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+}
+function render(){
+ if(S.view==='home')renderHome();
+ else if(S.view==='vendor')renderVendor();
+ else if(S.view==='history')renderHistory();
+ else renderSummary();
+ save();
+}
+// 跨夜自動換日:過了 00:00 自動重新載入,開新的一張;昨天的資料自動進「每日點貨紀錄」
+setInterval(()=>{if(new Date().toDateString()!==today.toDateString())location.reload()},30000);
+function header(){
+ return '<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">永和店</span><span class="proto">畫面雛形</span></header>';
+}
+function renderHome(){
+ const d=today;
+ const weekHtml=[1,2,3,4,5,6,0].map(dw=>{
+  const names=VENDORS.filter(v=>v.sched.includes(dw)).map(v=>v.name);
+  return '<div class="day'+(dw===d.getDay()?' today':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+names.length+' 家</span></div>';
+ }).join('');
+ const vlist=VENDORS.map(v=>{
+  const on=isOrderDay(v);const p=vendorProgress(v);
+  let stat='';
+  if(on){stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:'尚未點');}
+  return '<div class="vrow'+(on?'':' off')+'" '+(on?'data-v="'+v.id+'"':'')+'>'+
+   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不點')+'</span></div>'+
+   '<div class="vnote">'+esc(v.note)+'</div></div>'+
+   '<div class="vstat">'+stat+'</div>'+(on?'<span class="arrow">›</span>':'')+'</div>';
+ }).join('');
+ const anyMsg=VENDORS.some(v=>isOrderDay(v)&&vendorMsg(v));
+ app.innerHTML=header()+'<main>'+
+  '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
+  '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年</div>'+
+  '<div class="toggle">今天是紅字日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,見紅休':'否,平常日')+'</button></div></div>'+
+  '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
+  '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
+  '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
+  (recentNames().length?'<div class="people"><span style="font-size:13px;color:var(--sub);align-self:center">最近:</span>'+recentNames().map(p=>'<button class="chip" data-p="'+esc(p)+'">'+esc(p)+'</button>').join('')+'</div>':'')+
+  '</div>'+
+  '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
+  '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
+  '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
+  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」8 家廠商定稿版;津華、央廚待確認後加入。各家「哪天點貨」是照分頁上的送貨/休假日推的,要老闆確認。輸入只存在這支手機,還沒連資料庫。</footer>';
+ document.getElementById('hol').onclick=()=>{S.holiday=!S.holiday;render()};
+ document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
+ app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
+ app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
+ const ts=document.getElementById('tosum');if(ts)ts.onclick=()=>{S.view='summary';render();window.scrollTo(0,0)};
+ document.getElementById('tohist').onclick=()=>{S.view='history';render();window.scrollTo(0,0)};
+}
+function renderVendor(){
+ const v=VENDORS.find(x=>x.id===S.vid);const st=S.data[v.id];const p=vendorProgress(v);
+ const items=v.items.map((it,i)=>{
+  const tag=it.type==='par'?'<span class="tag t-par">補到滿</span>':it.type==='trig'?'<span class="tag t-trig">碰到門檻</span>':'<span class="tag t-spec">特殊</span>';
+  const pend=it.pend?' <span class="tag t-pend">'+esc(it.pend)+'</span>':'';
+  const parNow=(it.parHoliday&&S.holiday)?it.parHoliday:it.par;
+  const rule=it.type==='par'?('每天補到 '+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':'')):esc(it.rule||'');
+  let mid;
+  if(it.type==='spec'){
+   mid='<div class="sw"><button data-sw="'+i+'" class="'+(st[i].on?'on':'')+'"></button><span>'+(st[i].on?'要叫':'不叫')+'</span></div>'+
+    (st[i].on?'<input data-q="'+i+'" value="'+esc(st[i].qty||it.oq||'')+'" placeholder="數量" style="width:90px;height:40px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);text-align:center;font-family:inherit;font-size:15px">':'');
+  }else{
+   const r=calcItem(it,st[i]);
+   const res=r===null?'<div class="result">應叫<b>—</b></div>':(r.order?'<div class="result order">應叫<b>'+esc(r.text)+'</b></div>':'<div class="result zero">應叫<b>0</b></div>');
+   mid='<div class="stock"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="庫存" value="'+(st[i].stock===null?'':st[i].stock)+'"><button data-a="'+i+'">＋</button></div>'+res;
+  }
+  return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span><span class="iunit">'+it.u+'</span></div>'+mid+'</div>'+
+   '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
+ }).join('');
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+'</div></div></div>'+
+  '<main>'+items+'</main>'+
+  '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
+ document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ const mark=i=>{st[i].by=(S.person||'').trim()}; // 每一筆記下是誰輸入的(多人輪流點時換名字即可)
+ app.querySelectorAll('[data-s]').forEach(inp=>inp.oninput=()=>{const i=+inp.dataset.s;st[i].stock=inp.value===''?null:inp.value;mark(i);refreshVendor()});
+ app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=+b.dataset.a;st[i].stock=(Number(st[i].stock)||0)+1;mark(i);render()});
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const i=+b.dataset.m;st[i].stock=Math.max(0,(Number(st[i].stock)||0)-1);mark(i);render()});
+ app.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{const i=+b.dataset.sw;st[i].on=!st[i].on;mark(i);render()});
+ app.querySelectorAll('[data-q]').forEach(inp=>inp.oninput=()=>{const i=+inp.dataset.q;st[i].qty=inp.value;mark(i);save()});
+ function refreshVendor(){ // 更新應叫顯示但不重畫(避免輸入中斷)
+  v.items.forEach((it,i)=>{
+   if(it.type==='spec')return;
+   const r=calcItem(it,st[i]);
+   const el=app.querySelector('[data-s="'+i+'"]');if(!el)return;
+   const res=el.closest('.itop').querySelector('.result');
+   if(r===null){res.className='result';res.innerHTML='應叫<b>—</b>';}
+   else if(r.order){res.className='result order';res.innerHTML='應叫<b>'+esc(r.text)+'</b>';}
+   else{res.className='result zero';res.innerHTML='應叫<b>0</b>';}
+  });save();
+ }
+}
+function renderSummary(){
+ const blocks=VENDORS.filter(isOrderDay).map(v=>{
+  const m=vendorMsg(v);
+  return '<div class="msg"><div class="mh">'+v.name+(m?'<button class="copy" data-c="'+v.id+'">複製</button>':'')+'</div>'+
+   (m?'<pre id="pre-'+v.id+'">'+esc(m)+'</pre>':'<div class="empty">今日無需叫貨(或尚未點)</div>')+'</div>';
+ }).join('');
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">今日叫貨訊息</div><div class="d">一家一則,複製後貼到該廠商的 LINE 群組</div></div></div>'+
+  '<main>'+blocks+'<button class="ghost" id="bk2">回首頁繼續點</button></main>';
+ document.getElementById('bk').onclick=document.getElementById('bk2').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{
+  const t=document.getElementById('pre-'+b.dataset.c).textContent;
+  const ok=()=>{b.textContent='已複製 ✓';b.classList.add('done');setTimeout(()=>{b.textContent='複製';b.classList.remove('done')},2000)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok).catch(()=>fallback(t,ok));}
+  else fallback(t,ok);
+  function fallback(txt,cb){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb()}catch(e){alert('請長按文字手動複製')}document.body.removeChild(ta);}
+ });
+}
+render();
+</script>
