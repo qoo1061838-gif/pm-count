@@ -169,7 +169,6 @@ const VENDORS=[
   {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
  ]},
  {id:'bao',name:'寶綠',rest:[],fixed:[0,4],red:true,note:'固定週日、週四點貨;見紅休',items:[
-  {n:'凝膜紙',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
   {n:'防油紙袋4號',u:'捆',type:'par',par:1,rule:'原名:麵包袋'},
   {n:'除油林',u:'罐',type:'par',par:1},
   {n:'大六兩袋',u:'包',type:'par',par:3},
@@ -375,8 +374,8 @@ function renderHome(){
  const vlist=VENDORS.map(v=>{
   const on=isOrderDay(v);const p=vendorProgress(v);
   const stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:(on?'尚未點':''));
-  return '<div class="vrow'+(on?'':' off')+'" data-v="'+v.id+'">'+
-   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不在行程')+'</span></div>'+
+  return '<div class="vrow" data-v="'+v.id+'">'+
+   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不用點(可照點)')+'</span></div>'+
    '<div class="vnote">'+esc(v.note)+'</div></div>'+
    '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
  }).join('');
@@ -420,7 +419,7 @@ function renderVendor(){
   return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span><span class="iunit">'+it.u+'</span></div>'+mid+'</div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
- app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · ⚠ 今天不在行程,仍可照點')+'</div></div></div>'+
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · 行程顯示今天不用點,仍可照點')+'</div></div></div>'+
   '<main>'+items+'</main>'+
   '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
