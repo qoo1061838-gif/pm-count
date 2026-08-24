@@ -71,7 +71,7 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .vrow{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);cursor:pointer}
 .vrow:last-child{border-bottom:none}
-.vrow.off{opacity:.45;cursor:default}
+.vrow.off{opacity:.55}
 .vname{font-weight:700;font-size:16px}
 .vnote{font-size:12px;color:var(--sub)}
 .vstat{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--sub);text-align:right;white-space:nowrap}
@@ -152,7 +152,7 @@ const VENDORS=[
   {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
   {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
  ]},
- {id:'kai',name:'開元',sched:[1,4],red:false,note:'一、四送貨',items:[
+ {id:'kai',name:'開元',sched:[3,5],red:false,note:'五點→一送(已確認);三點→四送(待確認)',items:[
   {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
   {n:'法國長棍',u:'包',type:'par',par:3},
  ]},
@@ -181,7 +181,7 @@ const VENDORS=[
   {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
   {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
  ]},
- {id:'guo',name:'國豐',sched:[0,1,2,3,4,5,6],red:true,note:'見紅休(點貨日:待確認)',items:[
+ {id:'guo',name:'國豐',sched:[0],red:true,note:'每週日點貨 → 週一送貨',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
   {n:'細辣椒粉',u:'包',type:'par',par:2},
   {n:'蒜頭酥',u:'包',type:'par',par:1},
@@ -219,8 +219,9 @@ const DOW='日一二三四五六';
 
 // ---------- 狀態 ----------
 const today=new Date();
-const S={view:'home',vid:null,person:null,holiday:(today.getDay()===0||today.getDay()===6),
+const S={view:'home',vid:null,person:null,holiday:false, // holiday=國定假日(紅字);週末不算,見紅休廠商只休國定假日
  data:{}}; // data[vid][itemIndex] = {stock:number|null, on:bool, qty:string}
+const isWeekendOrRed=()=>S.holiday||today.getDay()===0||today.getDay()===6; // 綠長春假日量用:週末或紅字都算假日
 VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
 try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
  if(saved){S.person=saved.person;S.holiday=saved.holiday;Object.assign(S.data,saved.data);}}catch(e){}
@@ -240,7 +241,7 @@ function calcItem(it,st){
  if(st.stock===null||st.stock==='')return null;
  const s=Number(st.stock); if(isNaN(s))return null;
  if(it.type==='par'){
-  const par=(it.parHoliday&&S.holiday)?it.parHoliday:it.par;
+  const par=(it.parHoliday&&isWeekendOrRed())?it.parHoliday:it.par;
   const need=Math.max(0,Math.ceil(par-s));
   return need>0?{text:need+' '+it.u,order:true}:{text:'不用叫',order:false};
  }
@@ -354,18 +355,17 @@ function renderHome(){
  }).join('');
  const vlist=VENDORS.map(v=>{
   const on=isOrderDay(v);const p=vendorProgress(v);
-  let stat='';
-  if(on){stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:'尚未點');}
-  return '<div class="vrow'+(on?'':' off')+'" '+(on?'data-v="'+v.id+'"':'')+'>'+
-   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不點')+'</span></div>'+
+  const stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:(on?'尚未點':''));
+  return '<div class="vrow'+(on?'':' off')+'" data-v="'+v.id+'">'+
+   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不在行程')+'</span></div>'+
    '<div class="vnote">'+esc(v.note)+'</div></div>'+
-   '<div class="vstat">'+stat+'</div>'+(on?'<span class="arrow">›</span>':'')+'</div>';
+   '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
  }).join('');
- const anyMsg=VENDORS.some(v=>isOrderDay(v)&&vendorMsg(v));
+ const anyMsg=VENDORS.some(v=>vendorMsg(v));
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
   '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年</div>'+
-  '<div class="toggle">今天是紅字日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,見紅休':'否,平常日')+'</button></div></div>'+
+  '<div class="toggle">今天是國定假日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,紅字日':'否,平常日')+'</button></div></div>'+
   '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
   '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
@@ -387,7 +387,7 @@ function renderVendor(){
  const items=v.items.map((it,i)=>{
   const tag=it.type==='par'?'<span class="tag t-par">補到滿</span>':it.type==='trig'?'<span class="tag t-trig">碰到門檻</span>':'<span class="tag t-spec">特殊</span>';
   const pend=it.pend?' <span class="tag t-pend">'+esc(it.pend)+'</span>':'';
-  const parNow=(it.parHoliday&&S.holiday)?it.parHoliday:it.par;
+  const parNow=(it.parHoliday&&isWeekendOrRed())?it.parHoliday:it.par;
   const rule=it.type==='par'?('每天補到 '+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':'')):esc(it.rule||'');
   let mid;
   if(it.type==='spec'){
@@ -401,7 +401,7 @@ function renderVendor(){
   return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span><span class="iunit">'+it.u+'</span></div>'+mid+'</div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
- app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+'</div></div></div>'+
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · ⚠ 今天不在行程,仍可照點')+'</div></div></div>'+
   '<main>'+items+'</main>'+
   '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
@@ -424,7 +424,7 @@ function renderVendor(){
  }
 }
 function renderSummary(){
- const blocks=VENDORS.filter(isOrderDay).map(v=>{
+ const blocks=VENDORS.filter(v=>isOrderDay(v)||vendorMsg(v)).map(v=>{
   const m=vendorMsg(v);
   return '<div class="msg"><div class="mh">'+v.name+(m?'<button class="copy" data-c="'+v.id+'">複製</button>':'')+'</div>'+
    (m?'<pre id="pre-'+v.id+'">'+esc(m)+'</pre>':'<div class="empty">今日無需叫貨(或尚未點)</div>')+'</div>';
