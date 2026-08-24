@@ -168,9 +168,9 @@ const VENDORS=[
   {n:'紹興酒',u:'罐',type:'par',par:3},
   {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
  ]},
- {id:'bao',name:'寶綠',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
+ {id:'bao',name:'寶綠',rest:[],fixed:[0,4],red:true,note:'固定週日、週四點貨;見紅休',items:[
   {n:'凝膜紙',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
-  {n:'麵包袋',u:'捆',type:'par',par:1},
+  {n:'防油紙袋4號',u:'捆',type:'par',par:1,rule:'原名:麵包袋'},
   {n:'除油林',u:'罐',type:'par',par:1},
   {n:'大六兩袋',u:'包',type:'par',par:3},
   {n:'洗碗精',u:'箱',type:'par',par:1},
@@ -180,6 +180,21 @@ const VENDORS=[
   {n:'無題把3斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
   {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
   {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
+  {n:'802扁碗(空白)',u:'條',type:'par',par:12},
+  {n:'PP165硬蓋',u:'條',type:'par',par:12},
+  {n:'大茶匙',u:'包',type:'par',par:2},
+  {n:'西餐叉',u:'包',type:'par',par:2},
+  {n:'厚四杯透明袋',u:'包',type:'par',par:1},
+  {n:'半斤袋(海豚有提把)',u:'包',type:'par',par:2},
+  {n:'攸活抽取式衛生紙',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱'},
+  {n:'320湯碗',u:'條',type:'par',par:5},
+  {n:'2532湯蓋',u:'條',type:'par',par:5},
+  {n:'透明麵包盒',u:'條',type:'par',par:2},
+  {n:'1.5oz醬料碟',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱(1箱約3條)'},
+  {n:'2oz醬料碟',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱(1箱約3條)'},
+  {n:'15×15單張淋膜紙(牛皮)',u:'包',type:'trig',th:0.3,cmp:'le',oq:'500 張',rule:'剩0.3 → 叫500張'},
+  {n:'我的擦手紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
+  {n:'9*9玫瑰方巾紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
  ]},
  {id:'guo',name:'國豐',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
@@ -226,6 +241,8 @@ const isWeekendOrRed=()=>S.holiday||tomorrow()===0||tomorrow()===6; // 綠長春
 VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
 try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
  if(saved){S.person=saved.person;S.holiday=saved.holiday;Object.assign(S.data,saved.data);}}catch(e){}
+// 品項清單有新增時,把舊存檔補齊到相同長度,避免當機
+VENDORS.forEach(v=>{const a=S.data[v.id]||[];while(a.length<v.items.length)a.push({stock:null,on:false,qty:''});S.data[v.id]=a;});
 function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data}))}catch(e){};logToday()}
 // 背景紀錄:每天誰點貨(自動,寫進手機的本機儲存)
 function logbook(){try{return JSON.parse(localStorage.getItem('pmcount-log'))||{}}catch(e){return{}}}
@@ -252,8 +269,9 @@ function calcItem(it,st){
  }
  return null;
 }
-function isOrderDay(v){ // 廠商「明天」休息 → 「今天」不用點
+function isOrderDay(v){ // 有固定點貨日的看今天;其他看「明天」:廠商明天休 → 今天不點
  if(S.holiday&&v.red)return false;
+ if(v.fixed)return v.fixed.includes(today.getDay());
  return !v.rest.includes(tomorrow());
 }
 function vendorProgress(v){
@@ -351,7 +369,7 @@ function header(){
 function renderHome(){
  const d=today;
  const weekHtml=[1,2,3,4,5,6,0].map(dw=>{
-  const n=VENDORS.filter(v=>!v.rest.includes((dw+1)%7)).length;
+  const n=VENDORS.filter(v=>v.fixed?v.fixed.includes(dw):!v.rest.includes((dw+1)%7)).length;
   return '<div class="day'+(dw===d.getDay()?' today':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+n+' 家</span></div>';
  }).join('');
  const vlist=VENDORS.map(v=>{
