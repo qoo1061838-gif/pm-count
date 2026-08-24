@@ -143,7 +143,7 @@ const VENDORS=[
   {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
- {id:'chang',name:'昶翔',sched:[1,4],red:true,note:'一、四送貨;見紅休',items:[
+ {id:'chang',name:'昶翔',sched:[1,4],red:true,note:'點貨日暫定一、四(待確認);見紅休',items:[
   {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
   {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
  ]},
@@ -152,11 +152,11 @@ const VENDORS=[
   {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
   {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
  ]},
- {id:'kai',name:'開元',sched:[3,5],red:false,note:'五點→一送(已確認);三點→四送(待確認)',items:[
+ {id:'kai',name:'開元',sched:[3,5],red:false,note:'週五點貨(已確認);週三點貨(待確認)',items:[
   {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
   {n:'法國長棍',u:'包',type:'par',par:3},
  ]},
- {id:'le',name:'樂沛',sched:[2,4,6],red:true,note:'二、四、六送貨;休三、日;見紅休',items:[
+ {id:'le',name:'樂沛',sched:[2,4,6],red:true,note:'點貨日暫定二、四、六(待確認);見紅休',items:[
   {n:'薯條(包好的)',u:'袋',type:'trig',th:1.5,cmp:'le',oq:'1 箱',rule:'剩1.5袋 → 叫1箱(=3袋)',pend:'修正待確認:改剩2.5袋'},
   {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
  ]},
@@ -181,7 +181,7 @@ const VENDORS=[
   {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
   {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
  ]},
- {id:'guo',name:'國豐',sched:[0],red:true,note:'每週日點貨 → 週一送貨',items:[
+ {id:'guo',name:'國豐',sched:[0],red:true,note:'每週日點貨(已確認)',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
   {n:'細辣椒粉',u:'包',type:'par',par:2},
   {n:'蒜頭酥',u:'包',type:'par',par:1},
