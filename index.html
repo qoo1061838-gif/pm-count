@@ -136,31 +136,31 @@ footer{padding:8px 16px 24px;font-size:11.5px;color:var(--sub);line-height:1.7}
 // type: par=補到滿  trig=碰到設定庫存  spec=特殊(綁定/混搭)
 // th: 觸發門檻(數字,單位=stockUnit或unit)  cmp: 'lt'低於 / 'le'剩  oq: 一次叫的文字
 const VENDORS=[
- {id:'shen',name:'申崧',sched:[1,2,3,4,5],red:true,note:'休六、日;見紅休',items:[
+ {id:'shen',name:'申崧',rest:[6,0],red:true,note:'廠商休六、日 → 週五、六不點;見紅休',items:[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
   {n:'黃金調和油',u:'罐',type:'trig',th:0.18,cmp:'le',oq:'1 罐',rule:'剩500ml才叫(1罐=2.8L,約0.2罐)'},
   {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
- {id:'chang',name:'昶翔',sched:[0,1,2,3,4,5,6],red:true,note:'每天點;見紅休',items:[
+ {id:'chang',name:'昶翔',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
   {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
   {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
  ]},
- {id:'wan',name:'萬堡莊',sched:[1,2,3,4,5],red:true,note:'休六、日;見紅休',items:[
+ {id:'wan',name:'萬堡莊',rest:[6,0],red:true,note:'廠商休六、日 → 週五、六不點;見紅休',items:[
   {n:'橄欖油',u:'罐',type:'trig',th:1,cmp:'le',oq:'1 箱',rule:'剩1罐 → 叫1箱(=4罐)'},
   {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
   {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
  ]},
- {id:'kai',name:'開元',sched:[0,1,2,3,4,5,6],red:false,note:'每天點',items:[
+ {id:'kai',name:'開元',rest:[],red:false,note:'每天點',items:[
   {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
   {n:'法國長棍',u:'包',type:'par',par:3},
  ]},
- {id:'le',name:'樂沛',sched:[1,2,4,5,6],red:true,note:'休三、日;見紅休',items:[
+ {id:'le',name:'樂沛',rest:[3,0],red:true,note:'廠商休三、日 → 週二、六不點;見紅休',items:[
   {n:'薯條(包好的)',u:'袋',type:'trig',th:1.5,cmp:'le',oq:'1 箱',rule:'剩1.5袋 → 叫1箱(=3袋)',pend:'修正待確認:改剩2.5袋'},
   {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
  ]},
- {id:'mei',name:'美食家',sched:[1,2,3,4,5,6],red:true,note:'休週日(待確認);見紅休',items:[
+ {id:'mei',name:'美食家',rest:[0],red:true,note:'廠商休週日(待確認)→ 週六不點;見紅休',items:[
   {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
   {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
   {n:'保鮮膜',u:'條',type:'par',par:2},
@@ -168,7 +168,7 @@ const VENDORS=[
   {n:'紹興酒',u:'罐',type:'par',par:3},
   {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
  ]},
- {id:'bao',name:'寶綠',sched:[0,1,2,3,4,5,6],red:true,note:'每天點;見紅休',items:[
+ {id:'bao',name:'寶綠',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
   {n:'凝膜紙',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
   {n:'麵包袋',u:'捆',type:'par',par:1},
   {n:'除油林',u:'罐',type:'par',par:1},
@@ -181,7 +181,7 @@ const VENDORS=[
   {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
   {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
  ]},
- {id:'guo',name:'國豐',sched:[0,1,2,3,4,5,6],red:true,note:'每天點;見紅休',items:[
+ {id:'guo',name:'國豐',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
   {n:'細辣椒粉',u:'包',type:'par',par:2},
   {n:'蒜頭酥',u:'包',type:'par',par:1},
@@ -219,9 +219,10 @@ const DOW='日一二三四五六';
 
 // ---------- 狀態 ----------
 const today=new Date();
-const S={view:'home',vid:null,person:null,holiday:false, // holiday=國定假日(紅字);週末不算,見紅休廠商只休國定假日
+const S={view:'home',vid:null,person:null,holiday:false, // holiday=「明天」是國定假日(紅字);今天點的貨明天到,所以一律看明天
  data:{}}; // data[vid][itemIndex] = {stock:number|null, on:bool, qty:string}
-const isWeekendOrRed=()=>S.holiday||today.getDay()===0||today.getDay()===6; // 綠長春假日量用:週末或紅字都算假日
+const tomorrow=()=>(today.getDay()+1)%7;
+const isWeekendOrRed=()=>S.holiday||tomorrow()===0||tomorrow()===6; // 綠長春假日量:明天是週末或紅字→用假日量
 VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
 try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
  if(saved){S.person=saved.person;S.holiday=saved.holiday;Object.assign(S.data,saved.data);}}catch(e){}
@@ -251,9 +252,9 @@ function calcItem(it,st){
  }
  return null;
 }
-function isOrderDay(v){
+function isOrderDay(v){ // 廠商「明天」休息 → 「今天」不用點
  if(S.holiday&&v.red)return false;
- return v.sched.includes(today.getDay());
+ return !v.rest.includes(tomorrow());
 }
 function vendorProgress(v){
  const st=S.data[v.id];let done=0,orders=0;
@@ -350,8 +351,8 @@ function header(){
 function renderHome(){
  const d=today;
  const weekHtml=[1,2,3,4,5,6,0].map(dw=>{
-  const names=VENDORS.filter(v=>v.sched.includes(dw)).map(v=>v.name);
-  return '<div class="day'+(dw===d.getDay()?' today':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+names.length+' 家</span></div>';
+  const n=VENDORS.filter(v=>!v.rest.includes((dw+1)%7)).length;
+  return '<div class="day'+(dw===d.getDay()?' today':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+n+' 家</span></div>';
  }).join('');
  const vlist=VENDORS.map(v=>{
   const on=isOrderDay(v);const p=vendorProgress(v);
@@ -365,7 +366,7 @@ function renderHome(){
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
   '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年</div>'+
-  '<div class="toggle">今天是國定假日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,紅字日':'否,平常日')+'</button></div></div>'+
+  '<div class="toggle">明天是國定假日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,明天紅字':'否,平常日')+'</button></div></div>'+
   '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
   '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
@@ -374,7 +375,7 @@ function renderHome(){
   '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
   '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
-  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」8 家廠商定稿版;津華、央廚待確認後加入。各家「哪天點貨」是照分頁上的送貨/休假日推的,要老闆確認。輸入只存在這支手機,還沒連資料庫。</footer>';
+  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」8 家廠商定稿版;津華、央廚待確認後加入。行程規則:每天都點,廠商「明天」休息(含明天是紅字日)→ 今天不點。輸入只存在這支手機,還沒連資料庫。</footer>';
  document.getElementById('hol').onclick=()=>{S.holiday=!S.holiday;render()};
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
