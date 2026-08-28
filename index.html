@@ -99,6 +99,7 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .itop .result{justify-self:end;margin-left:0}
 .itop>input{justify-self:end}
 .item .row1{min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.inum{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums;font-weight:700}
 .iname{font-weight:700;font-size:20px}
 .iunit{font-size:14px;color:var(--sub)}
 .tag{font-size:13px;border-radius:5px;padding:2px 9px;font-weight:700}
@@ -434,7 +435,7 @@ function renderHistory(){
     if(s.by)addP(s.by);
     const by=s.by?'<span class="hby">'+esc(s.by)+'</span>':'';
     if(it.type==='spec'){
-     if(s.on)lines.push('<div class="hitem"><span>'+esc(it.n)+'</span><span class="hres">叫 '+esc(s.qty||it.oq||'?')+'</span>'+by+'</div>');
+     if(s.on)lines.push('<div class="hitem"><span>'+(i+1)+'. '+esc(it.n)+'</span><span class="hres">叫 '+esc(s.qty||it.oq||'?')+'</span>'+by+'</div>');
      return;
     }
     if(s.stock===null||s.stock==='')return;
@@ -447,7 +448,7 @@ function renderHistory(){
     }else{
      const hit=it.cmp==='le'?n<=it.th:n<it.th;res=hit?'叫 '+it.oq:'不用叫';
     }
-    lines.push('<div class="hitem"><span>'+esc(it.n)+'</span><span class="hstock">庫存 '+esc(s.stock)+'</span><span class="hres'+(res==='不用叫'?' dim':'')+'">'+res+'</span>'+by+'</div>');
+    lines.push('<div class="hitem"><span>'+(i+1)+'. '+esc(it.n)+'</span><span class="hstock">庫存 '+esc(s.stock)+'</span><span class="hres'+(res==='不用叫'?' dim':'')+'">'+res+'</span>'+by+'</div>');
    });
    if(lines.length)vparts.push('<div class="hv"><div class="hvn">'+v.name+'</div>'+lines.join('')+'</div>');
   });
@@ -535,7 +536,8 @@ function renderVendor(){
   }
   // 數字輸入的品項:單位標在輸入格,名稱旁不重複標(特殊品項沒有輸入格,單位留在名稱旁)
   const nameUnit=it.type==='spec'?'<span class="iunit">'+it.u+'</span>':'';
-  return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
+  // 編號=資料順序,與 xlsx 規則檔「編號」欄一致(調整品項順序時的對照依據)
+  return '<div class="item"><div class="itop"><div class="row1"><span class="inum">'+(i+1)+'</span><span class="iname">'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
  const vw=isOrderDay(v)?holidayWarn(v):null;
