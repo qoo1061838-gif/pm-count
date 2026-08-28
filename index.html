@@ -94,20 +94,21 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .back{border:none;background:none;color:var(--accent);font-size:15px;font-family:inherit;cursor:pointer;padding:4px 6px 4px 0;font-weight:700}
 .vhead .t{font-weight:700;font-size:17px}
 .vhead .d{font-size:12px;color:var(--sub)}
-.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.itop{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:5px}
+.itop{display:grid;grid-template-columns:minmax(0,1fr) auto max-content;align-items:center;gap:10px}
 .itop .result{justify-self:end;margin-left:0}
 .itop>input{justify-self:end}
-.item .row1{min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.inum{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums;font-weight:700}
-.iname{font-weight:700;font-size:20px}
-.iunit{font-size:14px;color:var(--sub)}
-.tag{font-size:13px;border-radius:5px;padding:2px 9px;font-weight:700}
+.item .row1{min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+/* 編號用 <i> 內嵌在名稱字首:名稱折行時編號不會被擠成孤行 */
+.inum{font-style:normal;font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums;font-weight:700;margin-right:6px;position:relative;top:-1px}
+.iname{font-weight:700;font-size:18px;line-height:1.35;word-break:break-word}
+.iunit{font-size:13px;color:var(--sub)}
+.tag{font-size:11.5px;border-radius:4px;padding:1.5px 7px;font-weight:700;display:inline-block;margin-right:6px;vertical-align:1px;white-space:nowrap}
 .t-par{background:var(--ok-soft);color:var(--ok)}
 .t-trig{background:var(--warn-soft);color:var(--warn)}
 .t-spec{background:var(--info-soft);color:var(--info)}
 .t-pend{background:var(--pend-soft);color:var(--pend)}
-.irule{font-size:16px;color:var(--ink);opacity:.88;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.irule{font-size:13.5px;color:var(--sub);line-height:1.55} /* 規則=輔助行:降級灰字,長文自然折行、不撐版面 */
 .row2{display:flex;align-items:center;gap:10px}
 .stock{display:flex;align-items:center;gap:0;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);overflow:hidden}
 .stock button{width:36px;height:36px;border:none;background:none;color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;font-family:inherit}
@@ -115,8 +116,8 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .stock input:focus{outline:none}
 .stock input::placeholder{color:var(--input-line);font-weight:400;font-size:13px}
 .sunit{font-size:15px;font-weight:700;color:var(--accent);padding-right:2px;white-space:nowrap}
-.result{margin-left:auto;text-align:right;font-size:13px;color:var(--sub)}
-.result b{display:block;font-size:17px;color:var(--ink)}
+.result{margin-left:auto;text-align:right;font-size:11.5px;color:var(--sub);min-width:58px} /* 固定最小寬:每張卡的「應叫」欄對齊 */
+.result b{display:block;font-size:16px;line-height:1.3;color:var(--ink);white-space:nowrap}
 .result.order b{color:var(--accent)}
 .result.zero b{color:var(--ok)}
 .sw{display:flex;align-items:center;gap:8px;font-size:14px}
@@ -145,7 +146,7 @@ const VENDORS=[
  {id:'shen',name:'申崧',days:[1],red:true,note:'點貨日:週一',items:[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
-  {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L(改開關:要叫/不叫,2026-08-29 業主)'},
+  {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L'},
   {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
@@ -537,7 +538,7 @@ function renderVendor(){
   // 數字輸入的品項:單位標在輸入格,名稱旁不重複標(特殊品項沒有輸入格,單位留在名稱旁)
   const nameUnit=it.type==='spec'?'<span class="iunit">'+it.u+'</span>':'';
   // 編號=資料順序,與 xlsx 規則檔「編號」欄一致(調整品項順序時的對照依據)
-  return '<div class="item"><div class="itop"><div class="row1"><span class="inum">'+(i+1)+'</span><span class="iname">'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
+  return '<div class="item"><div class="itop"><div class="row1"><span class="iname"><i class="inum">'+(i+1)+'</i>'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
  const vw=isOrderDay(v)?holidayWarn(v):null;
