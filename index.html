@@ -97,6 +97,14 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .guide li{font-size:14.5px;line-height:1.6}
 .guide li b{color:var(--accent)}
 .guide .gtip{margin-top:12px;font-size:13px;color:var(--sub);background:var(--bg);border-radius:8px;padding:9px 12px;line-height:1.6}
+/* 系統問題與反饋紀錄 */
+.fbta{width:100%;min-height:88px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);font-family:inherit;font-size:15px;padding:10px 12px;line-height:1.6;resize:vertical;box-sizing:border-box}
+.fbta:focus{outline:none;border-color:var(--accent)}
+.fb{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:5px}
+.fbh{display:flex;align-items:baseline;gap:10px;font-size:13px}
+.fbh b{font-variant-numeric:tabular-nums}
+.fbdel{margin-left:auto;border:none;background:none;color:var(--sub);font-size:12px;cursor:pointer;font-family:inherit;padding:2px 4px}
+.fbt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
 .cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
 .cta:disabled{opacity:.4}
 .ghost{display:block;width:100%;border:1px solid var(--input-line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;font-size:15px;padding:12px;cursor:pointer}
@@ -471,10 +479,38 @@ function renderHistory(){
   '<main>'+(blocks||'<div class="card empty">還沒有任何紀錄,點過貨就會自動出現</div>')+'</main>';
  document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
 }
+// 系統問題與反饋紀錄:測試期讓同事隨手記問題/建議;每筆自動帶時間+記錄人(存本機)
+function fbList(){try{return JSON.parse(localStorage.getItem('pmcount-feedback'))||[]}catch(e){return[]}}
+function fbSave(a){try{localStorage.setItem('pmcount-feedback',JSON.stringify(a))}catch(e){}}
+function renderFeedback(){
+ const list=fbList();
+ const items=list.map((f,idx)=>{
+  const t=new Date(f.t);
+  return '<div class="fb"><div class="fbh"><b>'+(t.getMonth()+1)+'/'+t.getDate()+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+'</b>'+
+   '<span class="hby">'+esc(f.person||'沒記名字')+'</span><button class="fbdel" data-del="'+idx+'">刪除</button></div>'+
+   '<div class="fbt">'+esc(f.text)+'</div></div>';
+ }).reverse().join('');
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">系統問題與反饋紀錄</div><div class="d">測試時覺得怪怪的、有建議,都寫下來(存在這支手機)</div></div></div>'+
+  '<main><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
+  '<textarea id="fbtext" class="fbta" placeholder="例:津華 24 號九層塔的應叫怪怪的 / 希望字再大一點…"></textarea>'+
+  '<button class="cta" id="fbadd" style="padding:12px">送出</button></div>'+
+  (items||'<div class="card empty">還沒有任何紀錄,發現問題就寫下來吧</div>')+'</main>';
+ document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ document.getElementById('fbadd').onclick=()=>{
+  const ta=document.getElementById('fbtext');const txt=(ta.value||'').trim();
+  if(!txt){ta.focus();return;}
+  const a=fbList();a.push({t:new Date().toISOString(),person:(S.person||'').trim(),text:txt});fbSave(a);
+  renderFeedback();window.scrollTo(0,0);
+ };
+ app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+  const a=fbList();a.splice(+b.dataset.del,1);fbSave(a);renderFeedback();
+ });
+}
 function render(){
  if(S.view==='home')renderHome();
  else if(S.view==='vendor')renderVendor();
  else if(S.view==='history')renderHistory();
+ else if(S.view==='feedback')renderFeedback();
  else renderSummary();
  save();
 }
@@ -520,6 +556,7 @@ function renderHome(){
   (recentNames().length?'<div class="people"><span style="font-size:13px;color:var(--sub);align-self:center">最近:</span>'+recentNames().map(p=>'<button class="chip" data-p="'+esc(p)+'">'+esc(p)+'</button>').join('')+'</div>':'')+
   '</div>'+
   '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
+  '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
   '<details class="guide"><summary>📖 第一次用?點我看教學</summary><div class="gbody"><ol>'+
   '<li>先在上面輸入<b>你的名字</b>,讓大家知道今天是誰點的。</li>'+
   '<li>看「今日廠商」:標<b>綠色「今日要點」</b>的就是今天要點的,點它進去。(其他家標灰色,今天不用點;真的有需要也可以點進去照叫。)</li>'+
@@ -531,13 +568,14 @@ function renderHome(){
   '<li>看到 <b>⚠ 橘色提醒</b> = 下次點貨日碰到連假、那天不能叫 → <b>今天要多叫一點</b>,撐到提醒寫的日期。</li>'+
   '<li>想查之前點過什麼:首頁最下面「📒 每日點貨紀錄」。</li>'+
   '</ol><div class="gtip">小提醒:這是測試版,輸入的資料<b>只存在你自己的手機</b>,別人看不到你點的、你也看不到別人的。正式系統上線後才會同步。</div></div></details>'+
-  '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
+  '<button class="ghost" id="tofb">🛠 系統問題與反饋紀錄</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
   '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。輸入只存在這支手機,還沒連資料庫。</footer>';
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
  app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
  const ts=document.getElementById('tosum');if(ts)ts.onclick=()=>{S.view='summary';render();window.scrollTo(0,0)};
+ document.getElementById('tofb').onclick=()=>{S.view='feedback';render();window.scrollTo(0,0)};
  document.getElementById('tohist').onclick=()=>{S.view='history';render();window.scrollTo(0,0)};
 }
 function renderVendor(){
