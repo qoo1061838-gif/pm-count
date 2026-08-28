@@ -80,6 +80,10 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .badge{font-size:11px;border-radius:4px;padding:1px 6px}
 .b-rest{background:var(--line);color:var(--sub)}
 .b-order{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.b-warn{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.day.red{border-color:var(--warn);background:var(--warn-soft)}
+.day.red b{color:var(--warn)}
+.vwarn{font-size:12px;color:var(--warn);font-weight:700;margin-top:2px}
 .note{font-size:12.5px;color:var(--sub);line-height:1.6}
 .note b{color:var(--pend)}
 .cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
@@ -108,7 +112,8 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .stock button{width:36px;height:36px;border:none;background:none;color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;font-family:inherit}
 .stock input{width:48px;height:36px;border:none;background:none;color:var(--ink);text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
 .stock input:focus{outline:none}
-.stock input::placeholder{color:var(--input-line);font-weight:400;font-size:14px}
+.stock input::placeholder{color:var(--input-line);font-weight:400;font-size:13px}
+.sunit{font-size:15px;font-weight:700;color:var(--accent);padding-right:2px;white-space:nowrap}
 .result{margin-left:auto;text-align:right;font-size:13px;color:var(--sub)}
 .result b{display:block;font-size:17px;color:var(--ink)}
 .result.order b{color:var(--accent)}
@@ -136,31 +141,31 @@ footer{padding:8px 16px 24px;font-size:11.5px;color:var(--sub);line-height:1.7}
 // type: par=補到滿  trig=碰到設定庫存  spec=特殊(綁定/混搭)
 // th: 觸發門檻(數字,單位=stockUnit或unit)  cmp: 'lt'低於 / 'le'剩  oq: 一次叫的文字
 const VENDORS=[
- {id:'shen',name:'申崧',rest:[6,0],red:true,note:'廠商休六、日 → 週五、六不點;見紅休',items:[
+ {id:'shen',name:'申崧',days:[1],red:true,note:'點貨日:週一',items:[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
-  {n:'黃金調和油',u:'罐',type:'trig',th:0.18,cmp:'le',oq:'1 罐',rule:'剩500ml才叫(1罐=2.8L,約0.2罐)'},
+  {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L(改開關:要叫/不叫,2026-08-29 業主)'},
   {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
- {id:'chang',name:'昶翔',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
+ {id:'chang',name:'昶翔',days:[0,3],red:true,note:'點貨日:週日、週三',items:[
   {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
   {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
  ]},
- {id:'wan',name:'萬堡莊',rest:[6,0],red:true,note:'廠商休六、日 → 週五、六不點;見紅休',items:[
+ {id:'wan',name:'萬堡莊',days:[2,4],red:true,note:'點貨日:週二、週四',items:[
   {n:'橄欖油',u:'罐',type:'trig',th:1,cmp:'le',oq:'1 箱',rule:'剩1罐 → 叫1箱(=4罐)'},
   {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
   {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
  ]},
- {id:'kai',name:'開元',rest:[],red:false,note:'每天點',items:[
+ {id:'kai',name:'開元',days:[0,3],red:true,note:'點貨日:週日、週三(是否見紅休待確認,先當會休)',items:[
   {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
   {n:'法國長棍',u:'包',type:'par',par:3},
  ]},
- {id:'le',name:'樂沛',rest:[3,0],red:true,note:'廠商休三、日 → 週二、六不點;見紅休',items:[
-  {n:'薯條(包好的)',u:'袋',type:'trig',th:1.5,cmp:'le',oq:'1 箱',rule:'剩1.5袋 → 叫1箱(=3袋)',pend:'修正待確認:改剩2.5袋'},
+ {id:'le',name:'樂沛',days:[1,2,5],red:true,note:'點貨日:週一、週二、週五',items:[
+  {n:'薯條(包好的)',u:'袋',type:'trig',th:2.5,cmp:'le',oq:'1 箱',rule:'剩2.5袋 → 叫1箱(=3袋)'},
   {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
  ]},
- {id:'mei',name:'美食家',rest:[0],red:true,note:'廠商休週日(待確認)→ 週六不點;見紅休',items:[
+ {id:'mei',name:'美食家',days:[1],red:true,note:'點貨日:週一',items:[
   {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
   {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
   {n:'保鮮膜',u:'條',type:'par',par:2},
@@ -168,7 +173,7 @@ const VENDORS=[
   {n:'紹興酒',u:'罐',type:'par',par:3},
   {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
  ]},
- {id:'bao',name:'寶綠',rest:[],fixed:[0,4],red:true,note:'固定週日、週四點貨;見紅休',items:[
+ {id:'bao',name:'寶綠',days:[0,4],red:true,note:'點貨日:週日、週四',items:[
   {n:'防油紙袋4號',u:'捆',type:'par',par:1,rule:'原名:麵包袋'},
   {n:'除油林',u:'罐',type:'par',par:1},
   {n:'大六兩袋',u:'包',type:'par',par:3},
@@ -195,7 +200,7 @@ const VENDORS=[
   {n:'我的擦手紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
   {n:'9*9玫瑰方巾紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
  ]},
- {id:'guo',name:'國豐',rest:[],red:true,note:'每天點;明天紅字才不點',items:[
+ {id:'guo',name:'國豐',days:[0],red:true,note:'點貨日:週日',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
   {n:'細辣椒粉',u:'包',type:'par',par:2},
   {n:'蒜頭酥',u:'包',type:'par',par:1},
@@ -221,19 +226,96 @@ const VENDORS=[
   {n:'小磨坊洋香菜葉',u:'罐',type:'par',par:1},
   {n:'安佳無鹽奶油',u:'塊',type:'par',par:6},
   {n:'可果美番茄醬',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
-  {n:'番茄糊',u:'塊',type:'trig',th:3,cmp:'lt',oq:'1 罐',rule:'低於3塊 → 叫1罐(1罐≈15塊)',pend:'修正待確認:改低於5'},
+  {n:'番茄糊',u:'包',type:'trig',th:5,cmp:'lt',oq:'1 罐',rule:'低於5包 → 叫1罐(1罐≈15包)'},
   {n:'原粒黑胡椒',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
   {n:'海綿菜瓜布',u:'包',type:'par',par:1},
   {n:'棕刷',u:'個',type:'par',par:3},
   {n:'Tabasco',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
   {n:'雙色起士絲',u:'包',type:'par',par:4},
  ]},
+ {id:'jin',name:'津華',days:[1,2,3,4,5,6],red:false,note:'點貨日:週一~週六(菜商,紅字照點)',items:[
+  {n:'紅椒',u:'顆',type:'par',par:2},
+  {n:'黃椒',u:'顆',type:'par',par:2},
+  {n:'玉米筍',u:'盒',type:'par',par:8},
+  {n:'鴻禧菇',u:'包',type:'par',par:6},
+  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2,rule:'平日1.6/假日2,看明天'},
+  {n:'大陸妹',u:'kg',type:'par',par:2},
+  {n:'蘿蔓',u:'kg',type:'par',par:1},
+  {n:'蒜片',u:'kg',type:'par',par:0.3},
+  {n:'小番茄',u:'盒',type:'par',par:2},
+  {n:'擳瓜',u:'條',type:'trig',th:2,cmp:'lt',oq:'2 條',rule:'低於2條 → 叫2條'},
+  {n:'青龍椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
+  {n:'四季豆',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
+  {n:'紫洋蔥',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
+  {n:'西芹',u:'把',type:'trig',th:0.6,cmp:'lt',oq:'1 把',rule:'低於0.6把 → 叫1把'},
+  {n:'洋蔥',u:'顆',type:'trig',th:0,cmp:'le',oq:'4 顆',rule:'庫存歸零 → 叫4顆'},
+  {n:'馬鈴薯',u:'kg',type:'trig',th:0,cmp:'le',oq:'2 kg',rule:'庫存歸零 → 叫2kg'},
+  {n:'蒜苗',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.3 kg',rule:'庫存歸零 → 叫0.3kg'},
+  {n:'大辣椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.1 kg',rule:'庫存歸零 → 叫0.1kg'},
+  {n:'檸檬',u:'顆',type:'trig',th:2,cmp:'lt',oq:'2 顆',rule:'低於2顆 → 叫2顆'},
+  {n:'蒜碎',u:'包',type:'trig',th:2,cmp:'lt',oq:'2 包',rule:'低於2包 → 叫2包'},
+  {n:'精靈菇',u:'kg',type:'trig',th:0.6,cmp:'lt',oq:'1 kg',rule:'低於0.6kg → 叫1kg'},
+  {n:'蛤蜊',u:'袋',type:'trig',th:2,cmp:'lt',oq:'1 袋',rule:'低於2袋 → 叫1袋'},
+  {n:'小紅高',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
+  {n:'九層塔',u:'包',type:'trig',th:2,cmp:'lt',oq:'0.3 kg',rule:'低於2包 → 叫0.3kg(進貨後去梗打包成2包)'},
+  {n:'山藥',u:'包',type:'trig',th:4,cmp:'lt',oq:'1 條',rule:'低於4包 → 叫1條'},
+  {n:'去皮清肉(辣雞)',u:'包',type:'trig',th:6,cmp:'lt',oq:'2 kg',rule:'低於6包 → 叫2kg'},
+ ]},
+ {id:'ck',name:'央廚',days:[0,2,4,5,6],red:false,note:'點貨日:週日、二、四、五、六(中央廚房,紅字照點)',items:[
+  {n:'160麵',u:'袋',type:'par',par:5},
+  {n:'200麵',u:'袋',type:'par',par:8},
+  {n:'酸奶醬',u:'包',type:'par',par:1},
+  {n:'斜管',u:'包',type:'trig',th:31,cmp:'lt',oq:'1 袋',rule:'低於31包 → 叫1袋(=20包)'},
+  {n:'牛肉',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'青雞',u:'包',type:'trig',th:7,cmp:'lt',oq:'1 袋',rule:'低於7包 → 叫1袋(=5包)'},
+  {n:'雞翅',u:'包',type:'trig',th:10,cmp:'lt',oq:'1 袋',rule:'低於10包 → 叫1袋(=20包)'},
+  {n:'古月',u:'包',type:'trig',th:3,cmp:'lt',oq:'2 包',rule:'低於3包 → 叫2包'},
+  {n:'豬肉',u:'包',type:'trig',th:31,cmp:'lt',oq:'3 盒',rule:'低於31包 → 叫3盒(1盒=1kg)'},
+  {n:'蝦子',u:'袋',type:'trig',th:1.6,cmp:'lt',oq:'1 袋',rule:'低於1.6袋 → 叫1袋'},
+  {n:'透抽',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'鮭魚',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'提魚',u:'罐',type:'trig',th:0.6,cmp:'lt',oq:'1 包',rule:'低於0.6罐 → 叫1包(=2罐)'},
+  {n:'調味水-海鮮',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-辣雞',u:'包',type:'trig',th:125,cmp:'lt',oq:'1 箱',rule:'低於125包 → 叫1箱(=50包)'},
+  {n:'調味水-切達',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
+  {n:'調味水-白酒',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-素食',u:'包',type:'trig',th:11,cmp:'lt',oq:'1 箱',rule:'低於11包 → 叫1箱(=50包)'},
+  {n:'調味水-湯料',u:'包',type:'trig',th:6,cmp:'lt',oq:'1 袋',rule:'低於6包 → 叫1袋(=10包)'},
+  {n:'青醬',u:'片',type:'trig',th:9,cmp:'lt',oq:'1 袋',rule:'低於9片 → 叫1袋(=8片)'},
+  {n:'凱撒醬',u:'包',type:'trig',th:1,cmp:'lt',oq:'3 包',rule:'低於1包 → 叫3包'},
+  {n:'優格醬',u:'包',type:'trig',th:1,cmp:'lt',oq:'2 包',rule:'低於1包 → 叫2包'},
+  {n:'干貝',u:'包',type:'trig',th:1.1,cmp:'lt',oq:'2 包',rule:'低於1.1包 → 叫2包'},
+  {n:'湯培根',u:'包',type:'trig',th:1,cmp:'lt',oq:'2 包',rule:'低於1包 → 叫2包'},
+ ]},
 ];
 const DOW='日一二三四五六';
 
+// ---------- 年度紅字行事曆(115年官方核定版,2026 全年無補班日)----------
+// 紅字=國定假日本日+補假日(含落在週日的,如 10/25 光復節——寧可多備、不要漏訂)。
+// ⚠ 每年要換新年度行事曆;正式系統改放資料表、由 admin 在後台維護。
+const RED={
+ '2026-01-01':'元旦',
+ '2026-02-15':'小年夜','2026-02-16':'除夕','2026-02-17':'初一','2026-02-18':'初二','2026-02-19':'初三','2026-02-20':'春節補假',
+ '2026-02-27':'228補假','2026-02-28':'和平紀念日',
+ '2026-04-03':'兒童節補假','2026-04-04':'兒童節','2026-04-05':'清明節','2026-04-06':'清明補假',
+ '2026-05-01':'勞動節',
+ '2026-06-19':'端午節',
+ '2026-09-25':'中秋節','2026-09-28':'教師節',
+ '2026-10-09':'國慶補假','2026-10-10':'國慶日',
+ '2026-10-25':'光復節','2026-10-26':'光復補假',
+ '2026-12-25':'行憲紀念日',
+ '2027-01-01':'元旦', // 116年曆尚未核定,元旦為固定日先放
+};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const isRed=d=>Object.prototype.hasOwnProperty.call(RED,ymd(d));
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const md=d=>(d.getMonth()+1)+'/'+d.getDate();
+
 // ---------- 狀態 ----------
 const today=new Date();
-const S={view:'home',vid:null,person:null,holiday:false, // holiday=「明天」是國定假日(紅字);今天點的貨明天到,所以一律看明天
+const todayRedName=RED[ymd(today)]||null; // 今天是紅字 → 見紅休廠商停點
+const S={view:'home',vid:null,person:null,
+ holiday:isRed(addDays(today,1)), // holiday=「明天」是紅字(自動帶入行事曆,可手動改;給綠長春假日量用)
  data:{}}; // data[vid][itemIndex] = {stock:number|null, on:bool, qty:string}
 const tomorrow=()=>(today.getDay()+1)%7;
 const isWeekendOrRed=()=>S.holiday||tomorrow()===0||tomorrow()===6; // 綠長春假日量:明天是週末或紅字→用假日量
@@ -259,7 +341,9 @@ function calcItem(it,st){
  const s=Number(st.stock); if(isNaN(s))return null;
  if(it.type==='par'){
   const par=(it.parHoliday&&isWeekendOrRed())?it.parHoliday:it.par;
-  const need=Math.max(0,Math.ceil(par-s));
+  // kg 品項補到 0.1kg 精度(蒜片常備才 0.3kg,進位到整數會超叫);顆/包/罐類進位到整數
+  const step=it.u==='kg'?0.1:1;
+  const need=Math.max(0,Math.round(Math.ceil((par-s)/step-1e-9)*step*10)/10);
   return need>0?{text:need+' '+it.u,order:true}:{text:'不用叫',order:false};
  }
  if(it.type==='trig'){
@@ -268,10 +352,23 @@ function calcItem(it,st){
  }
  return null;
 }
-function isOrderDay(v){ // 有固定點貨日的看今天;其他看「明天」:廠商明天休 → 今天不點
- if(S.holiday&&v.red)return false;
- if(v.fixed)return v.fixed.includes(today.getDay());
- return !v.rest.includes(tomorrow());
+function isOrderDay(v){ // 固定點貨日(2026-08-29 店家確認);見紅休廠商遇紅字日停點
+ if(v.red&&todayRedName)return false;
+ return v.days.includes(today.getDay());
+}
+function nextOrderDate(v,from){ // from 之後(不含當天)最近的一個排程點貨日
+ for(let i=1;i<=21;i++){const d=addDays(from,i);if(v.days.includes(d.getDay()))return d;}
+ return null;
+}
+// 連假預警:下個點貨日遇紅字會停點 → 必須在「這一次」點貨就提醒多備
+// (例:申崧只有週一點;若下週一是連假 → 這週一點貨時就要多叫,撐到下下個能點的日子)
+function holidayWarn(v,from){
+ from=from||today;
+ if(!v.red)return null;
+ const n1=nextOrderDate(v,from);
+ if(!n1||!isRed(n1))return null;
+ let n2=n1;while(n2&&isRed(n2))n2=nextOrderDate(v,n2);
+ return {skip:n1,resume:n2,name:RED[ymd(n1)]};
 }
 function vendorProgress(v){
  const st=S.data[v.id];let done=0,orders=0;
@@ -295,6 +392,8 @@ function vendorMsg(v){
  if(!lines.length)return null;
  const d=(today.getMonth()+1)+'/'+today.getDate();
  let m='【PM Pasta 永和店 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
+ const w=isOrderDay(v)?holidayWarn(v):null; // 連假預警也寫進 LINE 訊息,廠商跟店裡都看得到
+ if(w)m+='\n※ 下次點貨日 '+md(w.skip)+' 遇'+w.name+'停點'+(w.resume?',下次可點:'+md(w.resume):'');
  if(S.person)m+='\n點貨人:'+S.person;
  return m;
 }
@@ -338,7 +437,9 @@ function renderHistory(){
     const n=Number(s.stock);let res;
     if(it.type==='par'){
      const par=(it.parHoliday&&rec.holiday)?it.parHoliday:it.par;
-     const need=Math.max(0,Math.ceil(par-n));res=need>0?'叫 '+need+' '+it.u:'不用叫';
+     const step=it.u==='kg'?0.1:1;
+     const need=Math.max(0,Math.round(Math.ceil((par-n)/step-1e-9)*step*10)/10);
+     res=need>0?'叫 '+need+' '+it.u:'不用叫';
     }else{
      const hit=it.cmp==='le'?n<=it.th:n<it.th;res=hit?'叫 '+it.oq:'不用叫';
     }
@@ -367,23 +468,33 @@ function header(){
 }
 function renderHome(){
  const d=today;
- const weekHtml=[1,2,3,4,5,6,0].map(dw=>{
-  const n=VENDORS.filter(v=>v.fixed?v.fixed.includes(dw):!v.rest.includes((dw+1)%7)).length;
-  return '<div class="day'+(dw===d.getDay()?' today':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+n+' 家</span></div>';
+ const wkStart=addDays(d,-((d.getDay()+6)%7)); // 本週從週一排到週日,顯示實際日期
+ const weekHtml=[0,1,2,3,4,5,6].map(i=>{
+  const wd=addDays(wkStart,i),dw=wd.getDay();
+  const n=VENDORS.filter(v=>v.days.includes(dw)).length;
+  const red=isRed(wd);
+  return '<div class="day'+(ymd(wd)===ymd(d)?' today':'')+(red?' red':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+md(wd)+'</span><span class="n">'+(red?esc(RED[ymd(wd)]):n+' 家')+'</span></div>';
  }).join('');
  const vlist=VENDORS.map(v=>{
   const on=isOrderDay(v);const p=vendorProgress(v);
+  const sched=v.days.includes(d.getDay()); // 今天本來是它的點貨日(可能被紅字擋掉)
+  const w=on?holidayWarn(v):null;
+  let badge;
+  if(sched&&!on)badge='<span class="badge b-warn">今日'+esc(todayRedName||'紅字')+'停點</span>';
+  else if(on)badge='<span class="badge b-order">今日要點</span>';
+  else badge='<span class="badge b-rest">今日不用點(可照點)</span>';
+  const warnHtml=w?'<div class="vwarn">⚠ 下次點貨日 '+md(w.skip)+' 遇'+esc(w.name)+'停點,今天請多備'+(w.resume?'到 '+md(w.resume):'')+'</div>':'';
   const stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:(on?'尚未點':''));
   return '<div class="vrow" data-v="'+v.id+'">'+
-   '<div><div class="vname">'+v.name+' <span class="badge '+(on?'b-order">今日要點':'b-rest">今日不用點(可照點)')+'</span></div>'+
-   '<div class="vnote">'+esc(v.note)+'</div></div>'+
+   '<div><div class="vname">'+v.name+' '+badge+'</div>'+
+   '<div class="vnote">'+esc(v.note)+'</div>'+warnHtml+'</div>'+
    '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
  }).join('');
  const anyMsg=VENDORS.some(v=>vendorMsg(v));
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
-  '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年</div>'+
-  '<div class="toggle">明天是國定假日?<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,明天紅字':'否,平常日')+'</button></div></div>'+
+  '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年'+(todayRedName?'<br><b style="color:var(--warn)">今天:'+esc(todayRedName)+'</b>':'')+'</div>'+
+  '<div class="toggle">明天紅字?(行事曆自動帶入)<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,明天紅字':'否,平常日')+'</button></div></div>'+
   '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
   '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
@@ -392,7 +503,7 @@ function renderHome(){
   '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
   '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
-  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」8 家廠商定稿版;津華、央廚待確認後加入。行程規則:每天都點,廠商「明天」休息(含明天是紅字日)→ 今天不點。輸入只存在這支手機,還沒連資料庫。</footer>';
+  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。輸入只存在這支手機,還沒連資料庫。</footer>';
  document.getElementById('hol').onclick=()=>{S.holiday=!S.holiday;render()};
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
@@ -414,13 +525,18 @@ function renderVendor(){
   }else{
    const r=calcItem(it,st[i]);
    const res=r===null?'<div class="result">應叫<b>—</b></div>':(r.order?'<div class="result order">應叫<b>'+esc(r.text)+'</b></div>':'<div class="result zero">應叫<b>0</b></div>');
-   mid='<div class="stock"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="庫存" value="'+(st[i].stock===null?'':st[i].stock)+'"><button data-a="'+i+'">＋</button></div>'+res;
+   // 輸入單位直接標在輸入格上(紅字),避免「品項有兩種單位、不知道填哪個」
+   mid='<div class="stock"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="?" value="'+(st[i].stock===null?'':st[i].stock)+'"><span class="sunit">'+it.u+'</span><button data-a="'+i+'">＋</button></div>'+res;
   }
-  return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span><span class="iunit">'+it.u+'</span></div>'+mid+'</div>'+
+  // 數字輸入的品項:單位標在輸入格,名稱旁不重複標(特殊品項沒有輸入格,單位留在名稱旁)
+  const nameUnit=it.type==='spec'?'<span class="iunit">'+it.u+'</span>':'';
+  return '<div class="item"><div class="itop"><div class="row1"><span class="iname">'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
- app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · 行程顯示今天不用點,仍可照點')+'</div></div></div>'+
-  '<main>'+items+'</main>'+
+ const vw=isOrderDay(v)?holidayWarn(v):null;
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · 行程顯示今天不用點,仍可照點')+'</div>'+
+  (vw?'<div class="vwarn">⚠ 下次點貨日 '+md(vw.skip)+' 遇'+esc(vw.name)+'停點,這次請多備'+(vw.resume?'到 '+md(vw.resume):'')+'</div>':'')+'</div></div>'+
+  '<main><div class="note">庫存照輸入格<b style="color:var(--accent)">紅字單位</b>數;可填小數:半=0.5、1/3≈0.33</div>'+items+'</main>'+
   '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
  const mark=i=>{st[i].by=(S.person||'').trim()}; // 每一筆記下是誰輸入的(多人輪流點時換名字即可)
