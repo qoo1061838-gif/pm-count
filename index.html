@@ -321,7 +321,7 @@ const tomorrow=()=>(today.getDay()+1)%7;
 const isWeekendOrRed=()=>S.holiday||tomorrow()===0||tomorrow()===6; // 綠長春假日量:明天是週末或紅字→用假日量
 VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
 try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
- if(saved){S.person=saved.person;S.holiday=saved.holiday;Object.assign(S.data,saved.data);}}catch(e){}
+ if(saved){S.person=saved.person;Object.assign(S.data,saved.data);}}catch(e){} // holiday 一律由行事曆算,不再從存檔還原(避免舊的手動切換蓋掉)
 // 品項清單有新增時,把舊存檔補齊到相同長度,避免當機
 VENDORS.forEach(v=>{const a=S.data[v.id]||[];while(a.length<v.items.length)a.push({stock:null,on:false,qty:''});S.data[v.id]=a;});
 function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data}))}catch(e){};logToday()}
@@ -494,7 +494,7 @@ function renderHome(){
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
   '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年'+(todayRedName?'<br><b style="color:var(--warn)">今天:'+esc(todayRedName)+'</b>':'')+'</div>'+
-  '<div class="toggle">明天紅字?(行事曆自動帶入)<br><button id="hol" class="'+(S.holiday?'on':'')+'">'+(S.holiday?'是,明天紅字':'否,平常日')+'</button></div></div>'+
+  '<div class="toggle">明天:'+(S.holiday?'<b style="color:var(--warn)">'+esc(RED[ymd(addDays(d,1))]||'紅字')+'(紅字)</b>':'平常日')+'<br><span style="font-size:11px">行事曆自動判定</span></div></div>'+
   '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
   '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
@@ -504,7 +504,6 @@ function renderHome(){
   '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
   '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。輸入只存在這支手機,還沒連資料庫。</footer>';
- document.getElementById('hol').onclick=()=>{S.holiday=!S.holiday;render()};
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
  app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
