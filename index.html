@@ -482,6 +482,16 @@ function renderHistory(){
 // 系統問題與反饋紀錄:測試期讓同事隨手記問題/建議;每筆自動帶時間+記錄人(存本機)
 function fbList(){try{return JSON.parse(localStorage.getItem('pmcount-feedback'))||[]}catch(e){return[]}}
 function fbSave(a){try{localStorage.setItem('pmcount-feedback',JSON.stringify(a))}catch(e){}}
+// 自動回傳:送出時背景塞進管理員的 Google 表單 → 自動寫進 Google Sheet(失敗不影響本機保存)
+const FB_FORM='https://docs.google.com/forms/d/e/1FAIpQLSdj85CfukF3P0m-JRMSTdGgXlDZB74dxL1E_IqBJWUVaZasbw/formResponse';
+function fbUpload(f){
+ try{
+  const b=new URLSearchParams();
+  b.append('entry.923633370',f.text);      // 問題反饋
+  b.append('entry.4187305',f.person||'沒記名字'); // 記錄人
+  fetch(FB_FORM,{method:'POST',mode:'no-cors',body:b});
+ }catch(e){}
+}
 function renderFeedback(){
  const list=fbList();
  const items=list.map((f,idx)=>{
@@ -490,7 +500,7 @@ function renderFeedback(){
    '<span class="hby">'+esc(f.person||'沒記名字')+'</span><button class="fbdel" data-del="'+idx+'">刪除</button></div>'+
    '<div class="fbt">'+esc(f.text)+'</div></div>';
  }).reverse().join('');
- app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">系統問題與反饋紀錄</div><div class="d">測試時覺得怪怪的、有建議,都寫下來(存在這支手機)</div></div></div>'+
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">系統問題與反饋紀錄</div><div class="d">覺得怪怪的、有建議都寫下來;送出後會<b>自動回傳給管理員</b></div></div></div>'+
   '<main><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<textarea id="fbtext" class="fbta" placeholder="例:津華 24 號九層塔的應叫怪怪的 / 希望字再大一點…"></textarea>'+
   '<button class="cta" id="fbadd" style="padding:12px">送出</button></div>'+
@@ -499,7 +509,9 @@ function renderFeedback(){
  document.getElementById('fbadd').onclick=()=>{
   const ta=document.getElementById('fbtext');const txt=(ta.value||'').trim();
   if(!txt){ta.focus();return;}
-  const a=fbList();a.push({t:new Date().toISOString(),person:(S.person||'').trim(),text:txt});fbSave(a);
+  const entry={t:new Date().toISOString(),person:(S.person||'').trim(),text:txt};
+  const a=fbList();a.push(entry);fbSave(a);
+  fbUpload(entry); // 同步自動回傳給管理員
   renderFeedback();window.scrollTo(0,0);
  };
  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
