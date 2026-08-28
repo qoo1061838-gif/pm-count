@@ -310,6 +310,10 @@ const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const isRed=d=>Object.prototype.hasOwnProperty.call(RED,ymd(d));
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const md=d=>(d.getMonth()+1)+'/'+d.getDate();
+function nextRed(from){ // 下一個紅字日(含天數);行事曆沒資料回 null
+ for(let i=1;i<=400;i++){const d=addDays(from,i);if(isRed(d))return{d,days:i};}
+ return null;
+}
 
 // ---------- 狀態 ----------
 const today=new Date();
@@ -494,7 +498,9 @@ function renderHome(){
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
   '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年'+(todayRedName?'<br><b style="color:var(--warn)">今天:'+esc(todayRedName)+'</b>':'')+'</div>'+
-  '<div class="toggle">明天:'+(S.holiday?'<b style="color:var(--warn)">'+esc(RED[ymd(addDays(d,1))]||'紅字')+'(紅字)</b>':'平常日')+'<br><span style="font-size:11px">行事曆自動判定</span></div></div>'+
+  '<div class="toggle">明天:'+(S.holiday?'<b style="color:var(--warn)">'+esc(RED[ymd(addDays(d,1))]||'紅字')+'(紅字)</b>':'平常日')+'<br>'+
+  (function(){const nr=nextRed(d);if(!nr||S.holiday)return '<span style="font-size:11px">行事曆自動判定</span>';
+   return '<span style="font-size:11px">下個紅字:'+esc(RED[ymd(nr.d)])+' '+md(nr.d)+'(還 '+nr.days+' 天)</span>';})()+'</div></div>'+
   '<h2>本週點貨行程</h2><div class="week">'+weekHtml+'</div>'+
   '<h2>今天點貨的人是</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
   '<input id="pname" class="pinput" placeholder="輸入你的名字" value="'+esc(S.person||'')+'">'+
