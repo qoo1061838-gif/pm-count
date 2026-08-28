@@ -86,6 +86,17 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .vwarn{font-size:12px;color:var(--warn);font-weight:700;margin-top:2px}
 .note{font-size:12.5px;color:var(--sub);line-height:1.6}
 .note b{color:var(--pend)}
+/* 使用教學(摺疊) */
+.guide{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.guide summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary::after{content:"▾";margin-left:auto;color:var(--sub);transition:transform .15s}
+.guide[open] summary::after{transform:rotate(180deg)}
+.guide .gbody{padding:0 16px 14px;border-top:1px solid var(--line)}
+.guide ol{margin:10px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:9px}
+.guide li{font-size:14.5px;line-height:1.6}
+.guide li b{color:var(--accent)}
+.guide .gtip{margin-top:12px;font-size:13px;color:var(--sub);background:var(--bg);border-radius:8px;padding:9px 12px;line-height:1.6}
 .cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
 .cta:disabled{opacity:.4}
 .ghost{display:block;width:100%;border:1px solid var(--input-line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;font-size:15px;padding:12px;cursor:pointer}
@@ -509,6 +520,17 @@ function renderHome(){
   (recentNames().length?'<div class="people"><span style="font-size:13px;color:var(--sub);align-self:center">最近:</span>'+recentNames().map(p=>'<button class="chip" data-p="'+esc(p)+'">'+esc(p)+'</button>').join('')+'</div>':'')+
   '</div>'+
   '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
+  '<details class="guide"><summary>📖 第一次用?點我看教學</summary><div class="gbody"><ol>'+
+  '<li>先在上面輸入<b>你的名字</b>,讓大家知道今天是誰點的。</li>'+
+  '<li>看「今日廠商」:標<b>綠色「今日要點」</b>的就是今天要點的,點它進去。(其他家標灰色,今天不用點;真的有需要也可以點進去照叫。)</li>'+
+  '<li>每個品項,去櫃子<b>數還剩多少</b>,照輸入格<b>紅色字的單位</b>填數字。例:剩 3 包填 3;剩半包填 <b>0.5</b>。</li>'+
+  '<li>「應叫」<b>系統自動算好</b>,你不用自己算。顯示 0 = 這項不用叫。</li>'+
+  '<li>有開關的品項(像黃金調和油):需要叫就把<b>開關打開</b>。</li>'+
+  '<li>這家點完按下面的按鈕回首頁,換下一家。</li>'+
+  '<li>全部點完 → 按紅色大按鈕<b>「產生今日叫貨訊息」</b>→ 一家一則,按「複製」貼到那家廠商的 LINE 群組。</li>'+
+  '<li>看到 <b>⚠ 橘色提醒</b> = 下次點貨日碰到連假、那天不能叫 → <b>今天要多叫一點</b>,撐到提醒寫的日期。</li>'+
+  '<li>想查之前點過什麼:首頁最下面「📒 每日點貨紀錄」。</li>'+
+  '</ol><div class="gtip">小提醒:這是測試版,輸入的資料<b>只存在你自己的手機</b>,別人看不到你點的、你也看不到別人的。正式系統上線後才會同步。</div></div></details>'+
   '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
   '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。輸入只存在這支手機,還沒連資料庫。</footer>';
