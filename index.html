@@ -254,12 +254,13 @@ const VENDORS=[
   {n:'Tabasco',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
   {n:'雙色起士絲',u:'包',type:'par',par:4},
  ]},
- {id:'jin',name:'津華',days:[1,2,3,4,5,6],red:false,note:'點貨日:週一~週六(菜商,紅字照點)',items:[
+ // restDates=菜商「臨時休」日期(如某幾個週四、或菜商有休的紅字日),Ya Chen 提前告知後加進來,格式 'YYYY-MM-DD'
+ {id:'jin',name:'津華',days:[1,2,3,4,5,6],red:false,veg:true,restDow:[1],restDates:[],note:'點貨日:週一~週六(菜商固定週一休;紅字照點)',items:[
   {n:'紅椒',u:'顆',type:'par',par:2},
   {n:'黃椒',u:'顆',type:'par',par:2},
   {n:'玉米筍',u:'盒',type:'par',par:8},
   {n:'鴻禧菇',u:'包',type:'par',par:6},
-  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2,rule:'平日1.6/假日2,看明天'},
+  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2,parTwo:2.8,rule:'平日1.6/假日2(週六或紅字到貨)/兩天2.8(菜商隔天休)'},
   {n:'大陸妹',u:'kg',type:'par',par:2},
   {n:'蘿蔓',u:'kg',type:'par',par:1},
   {n:'蒜片',u:'kg',type:'par',par:0.3},
@@ -349,7 +350,7 @@ try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString())
  if(saved){S.person=saved.person;Object.assign(S.data,saved.data);}}catch(e){} // holiday 一律由行事曆算,不再從存檔還原(避免舊的手動切換蓋掉)
 // 品項清單有新增時,把舊存檔補齊到相同長度,避免當機
 VENDORS.forEach(v=>{const a=S.data[v.id]||[];while(a.length<v.items.length)a.push({stock:null,on:false,qty:''});S.data[v.id]=a;});
-function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data}))}catch(e){};logToday()}
+function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data,qm:Object.fromEntries(VENDORS.filter(x=>x.veg).map(x=>[x.id,qtyMode(x)]))}))}catch(e){};logToday()}
 // 背景紀錄:每天誰點貨(自動,寫進手機的本機儲存)
 function logbook(){try{return JSON.parse(localStorage.getItem('pmcount-log'))||{}}catch(e){return{}}}
 function logToday(){
@@ -361,11 +362,17 @@ function logToday(){
 }
 
 // ---------- 計算 ----------
-function calcItem(it,st){
- if(st.stock===null||st.stock==='')return null;
- const s=Number(st.stock); if(isNaN(s))return null;
+function qtyMode(v){ // 這家今天用哪一種量:normal / holiday / two
+ if(v&&v.veg){const m=vegMode(v).mode;return (m==='two'||m==='multi')?'two':m==='holiday'?'holiday':'normal';}
+ return isWeekendOrRed()?'holiday':'normal';
+}
+function parFor(it,qm){return qm==='two'?(it.parTwo!=null?it.parTwo:it.par*2):(qm==='holiday'&&it.parHoliday)?it.parHoliday:it.par;}
+function calcItem(it,st,v){return calcQty(it,st.stock,qtyMode(v));}
+function calcQty(it,stock,qm){
+ if(stock===null||stock==='')return null;
+ const s=Number(stock); if(isNaN(s))return null;
  if(it.type==='par'){
-  const par=(it.parHoliday&&isWeekendOrRed())?it.parHoliday:it.par;
+  const par=parFor(it,qm);
   // kg 品項補到 0.1kg 精度(蒜片常備才 0.3kg,進位到整數會超叫);顆/包/罐類進位到整數
   const step=it.u==='kg'?0.1:1;
   const need=Math.max(0,Math.round(Math.ceil((par-s)/step-1e-9)*step*10)/10);
@@ -373,12 +380,14 @@ function calcItem(it,st){
  }
  if(it.type==='trig'){
   const hit=it.cmp==='le'?s<=it.th:s<it.th;
-  return hit?{text:it.oq,order:true}:{text:'不用叫',order:false};
+  const oq=qm==='two'?dblQty(it.oq):it.oq; // 兩天量:門檻不變,只有叫貨量 ×2(Ya Chen 2026-09-11)
+  return hit?{text:oq,order:true}:{text:'不用叫',order:false};
  }
  return null;
 }
 function isOrderDay(v){ // 固定點貨日(2026-08-29 店家確認);見紅休廠商遇紅字日停點
  if(v.red&&todayRedName)return false;
+ if(v.veg&&vegMode(v).mode==='none')return false; // 明天菜商休 → 今天不點
  return v.days.includes(today.getDay());
 }
 function nextOrderDate(v,from){ // from 之後(不含當天)最近的一個排程點貨日
@@ -395,11 +404,31 @@ function holidayWarn(v,from){
  let n2=n1;while(n2&&isRed(n2))n2=nextOrderDate(v,n2);
  return {skip:n1,resume:n2,name:RED[ymd(n1)]};
 }
+// none=明天菜商休、今天不點;two=後天菜商休、今天叫兩天量;multi=連休超過兩天(系統算兩天量、提醒人工加量);
+// holiday=明天到貨日是週六或紅字(只有杏鮑菇有假日量);normal=平日量
+function vegRests(v,d){return v.restDow.includes(d.getDay())||v.restDates.includes(ymd(d));}
+function vegMode(v,from){
+ from=from||today;
+ const d1=addDays(from,1),d2=addDays(from,2),d3=addDays(from,3);
+ if(vegRests(v,d1))return{mode:'none',rest:d1};
+ if(vegRests(v,d2))return{mode:vegRests(v,d3)?'multi':'two',rest:d2,cover:d1};
+ if(d1.getDay()===6||isRed(d1))return{mode:'holiday',day:d1};
+ return{mode:'normal'};
+}
+function dblQty(q){const m=String(q).match(/^([\d.]+)\s*(.*)$/);return m?(Math.round(Number(m[1])*20)/10)+' '+m[2]:q;}
+function vegNote(v,from){ // 畫面/提醒用一句話;平日回空字串
+ const w=vegMode(v,from);const dd=d=>md(d)+'('+DOW[d.getDay()]+')';
+ if(w.mode==='none')return '明天 '+dd(w.rest)+' 菜商休,今天不點津華';
+ if(w.mode==='two')return dd(w.rest)+' 菜商休 → 今天叫兩天量(撐 '+md(w.cover)+'、'+md(w.rest)+')';
+ if(w.mode==='multi')return dd(w.rest)+' 起菜商連休超過兩天,系統只算兩天量,請人工加量';
+ if(w.mode==='holiday')return '明天 '+dd(w.day)+(isRed(w.day)?RED[ymd(w.day)]:'')+' 到貨 → 杏鮑菇用假日量 2kg';
+ return '';
+}
 function vendorProgress(v){
  const st=S.data[v.id];let done=0,orders=0;
  v.items.forEach((it,i)=>{
   if(it.type==='spec'){if(st[i].on){done++;orders++}return;}
-  const r=calcItem(it,st[i]);
+  const r=calcItem(it,st[i],v);
   if(r){done++;if(r.order)orders++;}
  });
  return{done,total:v.items.filter(it=>it.type!=='spec').length,orders};
@@ -411,7 +440,7 @@ function vendorMsg(v){
    if(st[i].on)lines.push('▸ '+it.n+' '+(st[i].qty||it.oq||'(數量待填)'));
    return;
   }
-  const r=calcItem(it,st[i]);
+  const r=calcItem(it,st[i],v);
   if(r&&r.order)lines.push('▸ '+it.n+' '+r.text);
  });
  if(!lines.length)return null;
@@ -419,6 +448,7 @@ function vendorMsg(v){
  let m='【PM Pasta 永和店 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
  const w=isOrderDay(v)?holidayWarn(v):null; // 連假預警也寫進 LINE 訊息,廠商跟店裡都看得到
  if(w)m+='\n※ 下次點貨日 '+md(w.skip)+' 遇'+w.name+'停點'+(w.resume?',下次可點:'+md(w.resume):'');
+ if(v.veg){const vm=vegMode(v);if(vm.mode==='two'||vm.mode==='multi')m+='\n※ 本次為兩天量('+md(vm.rest)+' 菜商休)';}
  if(S.person)m+='\n點貨人:'+S.person;
  return m;
 }
@@ -459,15 +489,8 @@ function renderHistory(){
      return;
     }
     if(s.stock===null||s.stock==='')return;
-    const n=Number(s.stock);let res;
-    if(it.type==='par'){
-     const par=(it.parHoliday&&rec.holiday)?it.parHoliday:it.par;
-     const step=it.u==='kg'?0.1:1;
-     const need=Math.max(0,Math.round(Math.ceil((par-n)/step-1e-9)*step*10)/10);
-     res=need>0?'叫 '+need+' '+it.u:'不用叫';
-    }else{
-     const hit=it.cmp==='le'?n<=it.th:n<it.th;res=hit?'叫 '+it.oq:'不用叫';
-    }
+    const hq=(rec.qm&&rec.qm[v.id])||(rec.holiday?'holiday':'normal'); // 舊紀錄沒存 qm → 沿用當時的紅字判斷
+    const r=calcQty(it,s.stock,hq);const res=r&&r.order?'叫 '+r.text:'不用叫';
     lines.push('<div class="hitem"><span>'+(i+1)+'. '+esc(it.n)+'</span><span class="hstock">庫存 '+esc(s.stock)+'</span><span class="hres'+(res==='不用叫'?' dim':'')+'">'+res+'</span>'+by+'</div>');
    });
    if(lines.length)vparts.push('<div class="hv"><div class="hvn">'+v.name+'</div>'+lines.join('')+'</div>');
@@ -536,7 +559,7 @@ function renderHome(){
  const wkStart=addDays(d,-((d.getDay()+6)%7)); // 本週從週一排到週日,顯示實際日期
  const weekHtml=[0,1,2,3,4,5,6].map(i=>{
   const wd=addDays(wkStart,i),dw=wd.getDay();
-  const n=VENDORS.filter(v=>v.days.includes(dw)).length;
+  const n=VENDORS.filter(v=>v.days.includes(dw)&&!(v.veg&&vegMode(v,wd).mode==='none')).length;
   const red=isRed(wd);
   return '<div class="day'+(ymd(wd)===ymd(d)?' today':'')+(red?' red':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+md(wd)+'</span><span class="n">'+(red?esc(RED[ymd(wd)]):n+' 家')+'</span></div>';
  }).join('');
@@ -545,14 +568,14 @@ function renderHome(){
   const sched=v.days.includes(d.getDay()); // 今天本來是它的點貨日(可能被紅字擋掉)
   const w=on?holidayWarn(v):null;
   let badge;
-  if(sched&&!on)badge='<span class="badge b-warn">今日'+esc(todayRedName||'紅字')+'停點</span>';
+  if(sched&&!on)badge='<span class="badge b-warn">'+(v.veg&&vegMode(v).mode==='none'?'今日不點(明天菜商休)':'今日'+esc(todayRedName||'紅字')+'停點')+'</span>';
   else if(on)badge='<span class="badge b-order">今日要點</span>';
   else badge='<span class="badge b-rest">今日不用點(可照點)</span>';
   const warnHtml=w?'<div class="vwarn">⚠ 下次點貨日 '+md(w.skip)+' 遇'+esc(w.name)+'停點,今天請多備'+(w.resume?'到 '+md(w.resume):'')+'</div>':'';
   const stat=p.done>=p.total&&p.total>0?'<span class="done">✓ 點完</span>':(p.done>0?p.done+'/'+p.total:(on?'尚未點':''));
   return '<div class="vrow" data-v="'+v.id+'">'+
    '<div><div class="vname">'+v.name+' '+badge+'</div>'+
-   '<div class="vnote">'+esc(v.note)+'</div>'+warnHtml+'</div>'+
+   '<div class="vnote">'+esc(v.note)+'</div>'+warnHtml+(v.veg&&vegNote(v)?'<div class="vwarn">🥬 '+esc(vegNote(v))+'</div>':'')+'</div>'+
    '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
  }).join('');
  const anyMsg=VENDORS.some(v=>vendorMsg(v));
@@ -578,11 +601,12 @@ function renderHome(){
   '<li>這家點完按下面的按鈕回首頁,換下一家。</li>'+
   '<li>全部點完 → 按紅色大按鈕<b>「產生今日叫貨訊息」</b>→ 一家一則,按「複製」貼到那家廠商的 LINE 群組。</li>'+
   '<li>看到 <b>⚠ 橘色提醒</b> = 下次點貨日碰到連假、那天不能叫 → <b>今天要多叫一點</b>,撐到提醒寫的日期。</li>'+
+  '<li>津華看到 <b>🥬 提醒</b>:菜商後天休 → 系統自動改<b>兩天量</b>(補到滿 ×2、碰到門檻的叫貨量 ×2、杏鮑菇 2.8kg),照「應叫」叫就好;明天菜商休 → 今天不用點津華。</li>'+
   '<li>想查之前點過什麼:首頁最下面「📒 每日點貨紀錄」。</li>'+
   '</ol><div class="gtip">小提醒:這是測試版,輸入的資料<b>只存在你自己的手機</b>,別人看不到你點的、你也看不到別人的。正式系統上線後才會同步。</div></div></details>'+
   '<button class="ghost" id="tofb">🛠 系統問題與反饋紀錄</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
-  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。輸入只存在這支手機,還沒連資料庫。</footer>';
+  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則(2026-08-29 確認):每家廠商固定點貨日、隔天送達;點貨日遇紅字(已內建 2026 官方行事曆)→ 當天停點,並在前一個點貨日提醒多備。津華依菜商休假自動切換平日/假日/兩天量(2026-09-11)。輸入只存在這支手機,還沒連資料庫。</footer>';
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
  app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
@@ -591,18 +615,19 @@ function renderHome(){
  document.getElementById('tohist').onclick=()=>{S.view='history';render();window.scrollTo(0,0)};
 }
 function renderVendor(){
- const v=VENDORS.find(x=>x.id===S.vid);const st=S.data[v.id];const p=vendorProgress(v);
+ const v=VENDORS.find(x=>x.id===S.vid);const st=S.data[v.id];const p=vendorProgress(v);const qm=qtyMode(v);
  const items=v.items.map((it,i)=>{
   const tag=it.type==='par'?'<span class="tag t-par">補到滿</span>':it.type==='trig'?'<span class="tag t-trig">碰到門檻</span>':'<span class="tag t-spec">特殊</span>';
   const pend=it.pend?' <span class="tag t-pend">'+esc(it.pend)+'</span>':'';
-  const parNow=(it.parHoliday&&isWeekendOrRed())?it.parHoliday:it.par;
-  const rule=it.type==='par'?('每天補到 '+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':'')):esc(it.rule||'');
+  const parNow=parFor(it,qm);
+  const rule=it.type==='par'?((qm==='two'?'今天兩天量:補到 ':'每天補到 ')+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':''))
+   :esc(it.rule||'')+(it.type==='trig'&&qm==='two'?' → 今天兩天量:叫 '+esc(dblQty(it.oq)):'');
   let mid;
   if(it.type==='spec'){
    mid='<div class="sw"><button data-sw="'+i+'" class="'+(st[i].on?'on':'')+'"></button><span>'+(st[i].on?'要叫':'不叫')+'</span></div>'+
     (st[i].on?'<input data-q="'+i+'" value="'+esc(st[i].qty||it.oq||'')+'" placeholder="數量" style="width:90px;height:40px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);text-align:center;font-family:inherit;font-size:15px">':'');
   }else{
-   const r=calcItem(it,st[i]);
+   const r=calcItem(it,st[i],v);
    const res=r===null?'<div class="result">應叫<b>—</b></div>':(r.order?'<div class="result order">應叫<b>'+esc(r.text)+'</b></div>':'<div class="result zero">應叫<b>0</b></div>');
    // 輸入單位直接標在輸入格上(紅字),避免「品項有兩種單位、不知道填哪個」
    mid='<div class="stock"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="?" value="'+(st[i].stock===null?'':st[i].stock)+'"><span class="sunit">'+it.u+'</span><button data-a="'+i+'">＋</button></div>'+res;
@@ -615,7 +640,8 @@ function renderVendor(){
  }).join('');
  const vw=isOrderDay(v)?holidayWarn(v):null;
  app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · 行程顯示今天不用點,仍可照點')+'</div>'+
-  (vw?'<div class="vwarn">⚠ 下次點貨日 '+md(vw.skip)+' 遇'+esc(vw.name)+'停點,這次請多備'+(vw.resume?'到 '+md(vw.resume):'')+'</div>':'')+'</div></div>'+
+  (vw?'<div class="vwarn">⚠ 下次點貨日 '+md(vw.skip)+' 遇'+esc(vw.name)+'停點,這次請多備'+(vw.resume?'到 '+md(vw.resume):'')+'</div>':'')+
+  (v.veg&&vegNote(v)?'<div class="vwarn">🥬 '+esc(vegNote(v))+'</div>':'')+'</div></div>'+
   '<main><div class="note">庫存照輸入格<b style="color:var(--accent)">紅字單位</b>數;可填小數:半=0.5、1/3≈0.33</div>'+items+'</main>'+
   '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
@@ -628,7 +654,7 @@ function renderVendor(){
  function refreshVendor(){ // 更新應叫顯示但不重畫(避免輸入中斷)
   v.items.forEach((it,i)=>{
    if(it.type==='spec')return;
-   const r=calcItem(it,st[i]);
+   const r=calcItem(it,st[i],v);
    const el=app.querySelector('[data-s="'+i+'"]');if(!el)return;
    const res=el.closest('.itop').querySelector('.result');
    if(r===null){res.className='result';res.innerHTML='應叫<b>—</b>';}
