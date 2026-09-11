@@ -1,0 +1,466 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PM Pasta 分店規則填寫</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#FAF7F2; --card:#FFFFFF; --ink:#26211C; --sub:#7A7168; --line:#E7E0D6;
+  --accent:#C4392E; --accent-ink:#FFFFFF; --accent-soft:#F7E3E0;
+  --ok:#2E7D46; --ok-soft:#E3F0E7; --warn:#C06A10; --warn-soft:#F8EAD8;
+  --info:#3B6FB5; --info-soft:#E4ECF7; --input:#FFFFFF; --input-line:#CFC6B8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1713; --card:#26211B; --ink:#EDE7DE; --sub:#A79C8F; --line:#3A332B;
+    --accent:#E0584A; --accent-ink:#FFFFFF; --accent-soft:#45231F;
+    --ok:#6FBF87; --ok-soft:#22382A; --warn:#E0993F; --warn-soft:#3E2F1B;
+    --info:#82A9DB; --info-soft:#243348; --input:#2E2822; --input-line:#55493C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1713; --card:#26211B; --ink:#EDE7DE; --sub:#A79C8F; --line:#3A332B;
+  --accent:#E0584A; --accent-ink:#FFFFFF; --accent-soft:#45231F;
+  --ok:#6FBF87; --ok-soft:#22382A; --warn:#E0993F; --warn-soft:#3E2F1B;
+  --info:#82A9DB; --info-soft:#243348; --input:#2E2822; --input-line:#55493C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:16px;line-height:1.55}
+.app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+header.top,.vhead{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:10px}
+.brand{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px}
+.brand em{color:var(--accent);font-style:normal}
+.store{font-size:13px;color:var(--sub);letter-spacing:.06em}
+main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--input-line);background:var(--input);color:var(--ink);border-radius:999px;padding:8px 16px;font-size:15px;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.chip.day{padding:6px 0;width:40px;text-align:center}
+.pinput{height:46px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);font-family:inherit;font-size:17px;padding:0 14px;width:100%}
+.pinput:focus,.num:focus,.txt:focus{outline:2px solid var(--accent);outline-offset:1px}
+.guide{font-size:14px;line-height:1.75;margin:0;padding-left:20px}
+.guide b{color:var(--accent)}
+.vrow{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.vrow:last-child{border-bottom:none}
+.vname{font-weight:700;font-size:17px}
+.vsub{font-size:12px;color:var(--sub)}
+.vstat{margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;color:var(--sub);white-space:nowrap}
+.vstat .done{color:var(--ok);font-weight:700}
+.arrow{color:var(--sub)}
+.cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
+.cta:disabled{opacity:.4;cursor:default}
+.ghost{display:block;width:100%;border:1.5px solid var(--input-line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;font-size:15px;padding:12px;cursor:pointer}
+.link{border:none;background:none;color:var(--sub);font-family:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:4px}
+.back{border:none;background:none;color:var(--accent);font-size:15px;font-family:inherit;cursor:pointer;padding:4px 6px 4px 0;font-weight:700}
+.vhead .t{font-weight:700;font-size:17px}
+.vhead .d{font-size:12px;color:var(--sub)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.item.unused{opacity:.55}
+.item.filled{border-color:var(--ok)}
+.ihead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.inum{font-style:normal;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+.iname{font-weight:700;font-size:18px}
+.tag{font-size:12px;border-radius:5px;padding:1px 8px;font-weight:700}
+.t-par{background:var(--ok-soft);color:var(--ok)}
+.t-trig{background:var(--warn-soft);color:var(--warn)}
+.t-spec{background:var(--info-soft);color:var(--info)}
+.ref{font-size:13px;color:var(--sub)}
+.fields{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.f{display:flex;align-items:center;gap:6px;font-size:15px}
+.num{width:78px;height:40px;border:1.5px solid var(--input-line);border-radius:9px;background:var(--input);color:var(--ink);text-align:center;font-family:inherit;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.num::placeholder,.txt::placeholder{color:var(--sub);opacity:.6;font-weight:400;font-size:13px}
+.u{color:var(--accent);font-weight:700}
+.txt{height:38px;border:1.5px solid var(--input-line);border-radius:9px;background:var(--input);color:var(--ink);font-family:inherit;font-size:14px;padding:0 10px;flex:1;min-width:0}
+.ifoot{display:flex;align-items:center;gap:10px}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);white-space:nowrap;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+.sw{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
+.sw input{width:22px;height:22px;accent-color:var(--ok)}
+.xrow{display:flex;gap:6px;align-items:center}
+.xrow .txt{flex:1}
+.xrow .small{flex:0 0 64px}
+.del{border:none;background:none;color:var(--accent);font-size:20px;cursor:pointer;padding:0 4px}
+.bottom{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.miss{font-size:14px;line-height:1.7}
+.miss b{color:var(--warn)}
+pre.out{margin:0;white-space:pre-wrap;word-break:break-all;font-family:inherit;font-size:13.5px;line-height:1.65;max-height:320px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:50}
+@media (prefers-reduced-motion:no-preference){.toast{transition:opacity .3s}}
+footer{padding:8px 16px 28px;font-size:11.5px;color:var(--sub);line-height:1.7}
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+// 品項資料由 scripts/build_fill_page.py 從永和點貨網頁(點貨畫面雛形.html)自動帶入,兩邊一致
+const VENDORS=[
+ {id:'shen',name:'申崧',days:[1],red:true,note:'點貨日:週一',items:[
+  {n:'培根',u:'包',type:'par',par:10},
+  {n:'番茄罐頭',u:'罐',type:'par',par:8},
+  {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L'},
+  {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
+  {n:'金山辣椒醬',u:'罐',type:'par',par:2},
+ ]},
+ {id:'chang',name:'昶翔',days:[0,3],red:true,note:'點貨日:週日、週三',items:[
+  {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
+  {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
+ ]},
+ {id:'wan',name:'萬堡莊',days:[2,4],red:true,note:'點貨日:週二、週四',items:[
+  {n:'橄欖油',u:'罐',type:'trig',th:1,cmp:'le',oq:'1 箱',rule:'剩1罐 → 叫1箱(=4罐)'},
+  {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
+  {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
+ ]},
+ {id:'kai',name:'開元',days:[0,3],red:true,note:'點貨日:週日、週三(是否見紅休待確認,先當會休)',items:[
+  {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
+  {n:'法國長棍',u:'包',type:'par',par:3},
+ ]},
+ {id:'le',name:'樂沛',days:[1,2,5],red:true,note:'點貨日:週一、週二、週五',items:[
+  {n:'薯條(包好的)',u:'袋',type:'trig',th:2.5,cmp:'le',oq:'1 箱',rule:'剩2.5袋 → 叫1箱(=3袋)'},
+  {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
+ ]},
+ {id:'mei',name:'美食家',days:[1],red:true,note:'點貨日:週一',items:[
+  {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
+  {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
+  {n:'保鮮膜',u:'條',type:'par',par:2},
+  {n:'錫箔紙',u:'條',type:'par',par:1},
+  {n:'紹興酒',u:'罐',type:'par',par:3},
+  {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
+ ]},
+ {id:'bao',name:'寶綠',days:[0,4],red:true,note:'點貨日:週日、週四',items:[
+  {n:'防油紙袋4號',u:'捆',type:'par',par:1,rule:'原名:麵包袋'},
+  {n:'除油林',u:'罐',type:'par',par:1},
+  {n:'大六兩袋',u:'包',type:'par',par:3},
+  {n:'洗碗精',u:'箱',type:'par',par:1},
+  {n:'漂白水',u:'罐',type:'par',par:1},
+  {n:'無題把半斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把1斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把3斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'30斤垃圾袋',u:'捆',type:'par',par:2},
+  {n:'802扁碗(空白)',u:'條',type:'par',par:12},
+  {n:'PP165硬蓋',u:'條',type:'par',par:12},
+  {n:'大茶匙',u:'包',type:'par',par:2},
+  {n:'西餐叉',u:'包',type:'par',par:2},
+  {n:'厚四杯透明袋',u:'包',type:'par',par:1},
+  {n:'半斤袋(海豚有提把)',u:'包',type:'par',par:2},
+  {n:'攸活抽取式衛生紙',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱'},
+  {n:'320湯碗',u:'條',type:'par',par:5},
+  {n:'2532湯蓋',u:'條',type:'par',par:5},
+  {n:'透明麵包盒',u:'條',type:'par',par:2},
+  {n:'1.5oz醬料碟',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱(1箱約3條)'},
+  {n:'2oz醬料碟',u:'箱',type:'trig',th:0.2,cmp:'le',oq:'1 箱',rule:'剩0.2箱 → 叫1箱(1箱約3條)'},
+  {n:'15×15單張淋膜紙(牛皮)',u:'包',type:'trig',th:0.3,cmp:'le',oq:'500 張',rule:'剩0.3 → 叫500張'},
+  {n:'我的擦手紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
+  {n:'9*9玫瑰方巾紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
+ ]},
+ {id:'guo',name:'國豐',days:[0],red:true,note:'點貨日:週日',items:[
+  {n:'粗辣椒粉',u:'包',type:'par',par:2},
+  {n:'細辣椒粉',u:'包',type:'par',par:2},
+  {n:'蒜頭酥',u:'包',type:'par',par:1},
+  {n:'鹽巴',u:'包',type:'par',par:3},
+  {n:'梅林',u:'罐',type:'par',par:4},
+  {n:'泰國魚露',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'紅花檸檬汁',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'玉米粒',u:'罐',type:'par',par:10},
+  {n:'蘑菇罐頭',u:'罐',type:'par',par:2},
+  {n:'冬菜',u:'罐',type:'par',par:1},
+  {n:'玉米粉',u:'盒',type:'par',par:9},
+  {n:'低筋麵粉',u:'袋',type:'par',par:1,rule:'5斤=1袋'},
+  {n:'白毛巾(長)',u:'條',type:'trig',th:5,cmp:'lt',oq:'1 包',rule:'低於5條 → 叫1包(=12條)'},
+  {n:'紅藜麥',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'酸豆',u:'罐',type:'par',par:2},
+  {n:'切段乾辣椒',u:'包',type:'par',par:2},
+  {n:'當歸',u:'盒',type:'trig',th:0.5,cmp:'lt',oq:'1 盒',rule:'低於0.5盒才叫'},
+  {n:'墨魚醬汁',u:'罐',type:'par',par:1},
+  {n:'焙煎胡麻醬',u:'罐',type:'par',par:1},
+  {n:'美廚蒔蘿草',u:'罐',type:'par',par:1},
+  {n:'小磨坊義大利綜合香料',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'小磨坊奧勒岡葉',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'小磨坊洋香菜葉',u:'罐',type:'par',par:1},
+  {n:'安佳無鹽奶油',u:'塊',type:'par',par:6},
+  {n:'可果美番茄醬',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'番茄糊',u:'包',type:'trig',th:5,cmp:'lt',oq:'1 罐',rule:'低於5包 → 叫1罐(1罐≈15包)'},
+  {n:'原粒黑胡椒',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'海綿菜瓜布',u:'包',type:'par',par:1},
+  {n:'棕刷',u:'個',type:'par',par:3},
+  {n:'Tabasco',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
+  {n:'雙色起士絲',u:'包',type:'par',par:4},
+ ]},
+ // restDates=菜商「臨時休」日期(如某幾個週四、或菜商有休的紅字日),Ya Chen 提前告知後加進來,格式 'YYYY-MM-DD'
+ {id:'jin',name:'津華',days:[1,2,3,4,5,6],red:false,veg:true,restDow:[1],restDates:[],note:'點貨日:週一~週六(菜商固定週一休;紅字照點)',items:[
+  {n:'紅椒',u:'顆',type:'par',par:2},
+  {n:'黃椒',u:'顆',type:'par',par:2},
+  {n:'玉米筍',u:'盒',type:'par',par:8},
+  {n:'鴻禧菇',u:'包',type:'par',par:6},
+  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2,parTwo:2.8,rule:'平日1.6/假日2(週六或紅字到貨)/兩天2.8(菜商隔天休)'},
+  {n:'大陸妹',u:'kg',type:'par',par:2},
+  {n:'蘿蔓',u:'kg',type:'par',par:1},
+  {n:'蒜片',u:'kg',type:'par',par:0.3},
+  {n:'小番茄',u:'盒',type:'par',par:2},
+  {n:'擳瓜',u:'條',type:'trig',th:2,cmp:'lt',oq:'2 條',rule:'低於2條 → 叫2條'},
+  {n:'青龍椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
+  {n:'四季豆',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
+  {n:'紫洋蔥',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
+  {n:'西芹',u:'把',type:'trig',th:0.6,cmp:'lt',oq:'1 把',rule:'低於0.6把 → 叫1把'},
+  {n:'洋蔥',u:'顆',type:'trig',th:0,cmp:'le',oq:'4 顆',rule:'庫存歸零 → 叫4顆'},
+  {n:'馬鈴薯',u:'kg',type:'trig',th:0,cmp:'le',oq:'2 kg',rule:'庫存歸零 → 叫2kg'},
+  {n:'蒜苗',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.3 kg',rule:'庫存歸零 → 叫0.3kg'},
+  {n:'大辣椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.1 kg',rule:'庫存歸零 → 叫0.1kg'},
+  {n:'檸檬',u:'顆',type:'trig',th:2,cmp:'lt',oq:'2 顆',rule:'低於2顆 → 叫2顆'},
+  {n:'蒜碎',u:'包',type:'trig',th:2,cmp:'lt',oq:'2 包',rule:'低於2包 → 叫2包'},
+  {n:'精靈菇',u:'kg',type:'trig',th:0.6,cmp:'lt',oq:'1 kg',rule:'低於0.6kg → 叫1kg'},
+  {n:'蛤蜊',u:'袋',type:'trig',th:2,cmp:'lt',oq:'1 袋',rule:'低於2袋 → 叫1袋'},
+  {n:'小紅高',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
+  {n:'九層塔',u:'包',type:'trig',th:2,cmp:'lt',oq:'0.3 kg',rule:'低於2包 → 叫0.3kg(進貨後去梗打包成2包)'},
+  {n:'山藥',u:'包',type:'trig',th:4,cmp:'lt',oq:'1 條',rule:'低於4包 → 叫1條'},
+  {n:'去皮清肉(辣雞)',u:'包',type:'trig',th:6,cmp:'lt',oq:'2 kg',rule:'低於6包 → 叫2kg'},
+ ]},
+ {id:'ck',name:'央廚',days:[0,2,4,5,6],red:false,note:'點貨日:週日、二、四、五、六(中央廚房,紅字照點)',items:[
+  {n:'160麵',u:'袋',type:'par',par:5},
+  {n:'200麵',u:'袋',type:'par',par:8},
+  {n:'酸奶醬',u:'包',type:'par',par:1},
+  {n:'斜管',u:'包',type:'trig',th:31,cmp:'lt',oq:'1 袋',rule:'低於31包 → 叫1袋(=20包)'},
+  {n:'牛肉',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'青雞',u:'包',type:'trig',th:7,cmp:'lt',oq:'1 袋',rule:'低於7包 → 叫1袋(=5包)'},
+  {n:'雞翅',u:'包',type:'trig',th:10,cmp:'lt',oq:'1 袋',rule:'低於10包 → 叫1袋(=20包)'},
+  {n:'古月',u:'包',type:'trig',th:3,cmp:'lt',oq:'2 包',rule:'低於3包 → 叫2包'},
+  {n:'豬肉',u:'包',type:'trig',th:31,cmp:'lt',oq:'3 盒',rule:'低於31包 → 叫3盒(1盒=1kg)'},
+  {n:'蝦子',u:'袋',type:'trig',th:1.6,cmp:'lt',oq:'1 袋',rule:'低於1.6袋 → 叫1袋'},
+  {n:'透抽',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'鮭魚',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
+  {n:'提魚',u:'罐',type:'trig',th:0.6,cmp:'lt',oq:'1 包',rule:'低於0.6罐 → 叫1包(=2罐)'},
+  {n:'調味水-海鮮',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-辣雞',u:'包',type:'trig',th:125,cmp:'lt',oq:'1 箱',rule:'低於125包 → 叫1箱(=50包)'},
+  {n:'調味水-切達',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
+  {n:'調味水-白酒',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-素食',u:'包',type:'trig',th:11,cmp:'lt',oq:'1 箱',rule:'低於11包 → 叫1箱(=50包)'},
+  {n:'調味水-湯料',u:'包',type:'trig',th:6,cmp:'lt',oq:'1 袋',rule:'低於6包 → 叫1袋(=10包)'},
+  {n:'青醬',u:'片',type:'trig',th:9,cmp:'lt',oq:'1 袋',rule:'低於9片 → 叫1袋(=8片)'},
+  {n:'凱撒醬',u:'包',type:'trig',th:1,cmp:'lt',oq:'3 包',rule:'低於1包 → 叫3包'},
+  {n:'優格醬',u:'包',type:'trig',th:1,cmp:'lt',oq:'2 包',rule:'低於1包 → 叫2包'},
+  {n:'干貝',u:'包',type:'trig',th:1.1,cmp:'lt',oq:'2 包',rule:'低於1.1包 → 叫2包'},
+  {n:'湯培根',u:'包',type:'trig',th:1,cmp:'lt',oq:'2 包',rule:'低於1包 → 叫2包'},
+ ]},
+];
+const STORES=['東湖店','永春店','土城店','中央廚房'];
+const DOW='日一二三四五六';
+const KEY='pmfill-v1';
+let DB;try{DB=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){DB={}}
+DB.stores=DB.stores||{};
+const S={view:'home',vid:null};
+const app=document.getElementById('app');
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function storeData(){
+ if(!DB.store)return null;
+ const s=DB.stores[DB.store]=DB.stores[DB.store]||{};
+ VENDORS.forEach(v=>{const d=s[v.id]=s[v.id]||{days:null,items:[],extra:[]};while(d.items.length<v.items.length)d.items.push({});});
+ return s;
+}
+const has=x=>x!=null&&String(x).trim()!=='';
+const oqNum=it=>{const m=String(it.oq||'').match(/^([\d.]+)/);return m?m[1]:''};
+const oqUnit=it=>String(it.oq||'').replace(/^[\d.]+\s*/,'')||it.u;
+const cmpText=it=>it.cmp==='le'?'剩(含)':'低於';
+const typeLabel=it=>it.type==='par'?'補到滿':it.type==='trig'?'碰到設定庫存':'特殊';
+function daysOf(v,d){return d.days||v.days}
+function isDone(it,e){
+ if(e.unused)return true;
+ if(it.type==='par')return has(e.par)&&(!it.parHoliday||has(e.hol))&&(!it.parTwo||has(e.two));
+ if(it.type==='trig')return has(e.th)&&has(e.oq);
+ return !!e.same||has(e.note);
+}
+function progress(v,d){const n=v.items.filter((it,i)=>isDone(it,d.items[i])).length;return{n,total:v.items.length}}
+function refText(it){
+ if(it.type==='par')return '永和:每天補到 '+it.par+(it.parHoliday?'/假日 '+it.parHoliday:'')+(it.parTwo?'/兩天 '+it.parTwo:'')+' '+it.u;
+ return '永和:'+(it.rule||'');
+}
+
+// ---------- 首頁 ----------
+function renderHome(){
+ const s=storeData();
+ const vlist=s?VENDORS.map((v,vi)=>{
+  const d=s[v.id],p=progress(v,d);
+  const stat=p.n>=p.total?'<span class="done">✓ 填完</span>':p.n+' / '+p.total;
+  return '<div class="vrow" data-v="'+v.id+'"><div><div class="vname">'+(vi+1)+'. '+esc(v.name)+'</div>'+
+   '<div class="vsub">點貨日:'+daysOf(v,d).map(x=>DOW[x]).join('、')+(d.extra.length?' · 新增 '+d.extra.length+' 項':'')+'</div></div>'+
+   '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
+ }).join(''):'';
+ const all=s?VENDORS.reduce((a,v)=>{const p=progress(v,s[v.id]);return{n:a.n+p.n,t:a.t+p.total}},{n:0,t:0}):{n:0,t:0};
+ app.innerHTML='<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">分店叫貨規則填寫</span></header><main>'+
+  '<div class="card"><ol class="guide">'+
+  '<li>先選<b>你們店</b>、填上<b>你的名字</b>。</li>'+
+  '<li>一家一家廠商點進去,照<b>你們店的習慣</b>填數字(灰色小字是永和店的數字,只是參考)。</li>'+
+  '<li>你們店沒用到的品項,勾「<b>我們店不用</b>」;永和沒有、你們有的,在每家最下面「新增品項」寫。</li>'+
+  '<li>全部填完按最下面紅色按鈕,把檔案<b>分享到 LINE</b> 傳給管理員。</li>'+
+  '</ol><div class="vsub" style="margin-top:6px">填到一半關掉沒關係,這支手機會自動記住,下次打開接著填。</div></div>'+
+  '<h2>你們店是</h2><div class="card" style="display:flex;flex-direction:column;gap:12px">'+
+  '<div class="chips">'+STORES.map(n=>'<button class="chip'+(DB.store===n?' on':'')+'" data-store="'+n+'">'+n+'</button>').join('')+'</div>'+
+  '<input id="person" class="pinput" placeholder="填寫人名字" value="'+esc(DB.person||'')+'"></div>'+
+  (s?'<h2>廠商(已填 '+all.n+' / '+all.t+' 項)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
+   '<button class="cta" id="finish">填完了,產生檔案傳給管理員</button>'+
+   '<button class="link" id="reset">清空「'+esc(DB.store)+'」重新填寫</button>'
+   :'<div class="card vsub">選好店名後,廠商清單就會出現。</div>')+
+  '</main><footer>品項與永和店點貨網頁同步;填寫內容只存在這支手機,按「產生檔案」傳出去管理員才收得到。</footer>';
+ app.querySelectorAll('[data-store]').forEach(b=>b.onclick=()=>{DB.store=b.dataset.store;save();renderHome()});
+ document.getElementById('person').oninput=e=>{DB.person=e.target.value;save()};
+ app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
+ const f=document.getElementById('finish');if(f)f.onclick=()=>{S.view='result';render();window.scrollTo(0,0)};
+ const rs=document.getElementById('reset');if(rs)rs.onclick=()=>{
+  if(confirm('確定清空「'+DB.store+'」已填的所有內容?清掉就找不回來。')){delete DB.stores[DB.store];save();renderHome();toast('已清空')}
+ };
+}
+
+// ---------- 廠商頁 ----------
+function itemFields(it,e,i){
+ const n=(k,ph)=>'<input class="num" inputmode="decimal" data-k="'+k+'" data-i="'+i+'" value="'+esc(e[k])+'" placeholder="'+esc(ph)+'">';
+ if(it.type==='par'){
+  let h='<span class="f">'+(it.parHoliday||it.parTwo?'平日補到':'每天補到')+' '+n('par','永和 '+it.par)+'<span class="u">'+esc(it.u)+'</span></span>';
+  if(it.parHoliday)h+='<span class="f">假日補到 '+n('hol','永和 '+it.parHoliday)+'<span class="u">'+esc(it.u)+'</span></span>';
+  if(it.parTwo)h+='<span class="f">兩天補到 '+n('two','永和 '+it.parTwo)+'<span class="u">'+esc(it.u)+'</span></span>';
+  return h;
+ }
+ if(it.type==='trig'){
+  return '<span class="f">'+cmpText(it)+' '+n('th','永和 '+it.th)+'<span class="u">'+esc(it.u)+'</span> 就叫</span>'+
+   '<span class="f">一次叫 '+n('oq','永和 '+oqNum(it))+'<span class="u">'+esc(oqUnit(it))+'</span></span>';
+ }
+ return '<label class="sw"><input type="checkbox" data-same="'+i+'"'+(e.same?' checked':'')+'>跟永和規則一樣</label>';
+}
+function renderVendor(){
+ const s=storeData();const v=VENDORS.find(x=>x.id===S.vid);const d=s[v.id];const p=progress(v,d);
+ const days=daysOf(v,d);
+ const items=v.items.map((it,i)=>{
+  const e=d.items[i];
+  const tag=it.type==='par'?'<span class="tag t-par">補到滿</span>':it.type==='trig'?'<span class="tag t-trig">碰到門檻</span>':'<span class="tag t-spec">特殊</span>';
+  return '<div class="item'+(e.unused?' unused':isDone(it,e)?' filled':'')+'" id="it'+i+'">'+
+   '<div class="ihead"><i class="inum">'+(i+1)+'</i><span class="iname">'+esc(it.n)+'</span>'+tag+'</div>'+
+   '<div class="ref">'+esc(refText(it))+'</div>'+
+   '<div class="fields">'+itemFields(it,e,i)+'</div>'+
+   '<div class="ifoot"><label class="chk"><input type="checkbox" data-unused="'+i+'"'+(e.unused?' checked':'')+'>我們店不用</label>'+
+   '<input class="txt" data-k="note" data-i="'+i+'" value="'+esc(e.note)+'" placeholder="'+(it.type==='spec'?'規則不一樣就寫在這裡':'備註(可不填)')+'"></div></div>';
+ }).join('');
+ const extra=d.extra.map((x,j)=>'<div class="xrow"><input class="txt" data-x="'+j+'" data-xk="name" value="'+esc(x.name)+'" placeholder="品項名">'+
+  '<input class="txt small" data-x="'+j+'" data-xk="unit" value="'+esc(x.unit)+'" placeholder="單位">'+
+  '<button class="del" data-xdel="'+j+'" aria-label="刪除這項">×</button></div>'+
+  '<input class="txt" style="margin:-2px 0 6px;flex:none;width:100%" data-x="'+j+'" data-xk="rule" value="'+esc(x.rule)+'" placeholder="規則,例:每天補到 3 包 / 低於 2 包叫 5 包">').join('');
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+esc(v.name)+'<span class="vsub"> · '+esc(DB.store)+'</span></div>'+
+  '<div class="d" id="vprog">已填 '+p.n+' / '+p.total+'</div></div></div>'+
+  '<main><div class="card"><div class="vsub" style="margin-bottom:8px">你們店向「'+esc(v.name)+'」點貨是禮拜幾?(預設=永和的,不同就點選修改)</div>'+
+  '<div class="chips">'+[1,2,3,4,5,6,0].map(x=>'<button class="chip day'+(days.includes(x)?' on':'')+'" data-day="'+x+'">'+DOW[x]+'</button>').join('')+'</div></div>'+
+  items+
+  '<h2>新增品項(永和沒有、你們店有的)</h2><div class="card" style="display:flex;flex-direction:column;gap:6px">'+
+  (extra||'<div class="vsub">沒有就不用填。</div>')+'<button class="ghost" id="xadd" style="margin-top:6px">+ 新增一項</button></div>'+
+  '</main><div class="bottom"><button class="cta" id="dn">這家填完了,回首頁</button></div>';
+ document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ const refresh=i=>{ // 只更新該品項外框與進度,不重畫(避免打字中斷)
+  const it=v.items[i],e=d.items[i],el=document.getElementById('it'+i);
+  el.className='item'+(e.unused?' unused':isDone(it,e)?' filled':'');
+  const q=progress(v,d);document.getElementById('vprog').textContent='已填 '+q.n+' / '+q.total;save();
+ };
+ app.querySelectorAll('[data-k]').forEach(inp=>inp.oninput=()=>{const i=+inp.dataset.i;d.items[i][inp.dataset.k]=inp.value.trim();refresh(i)});
+ app.querySelectorAll('[data-unused]').forEach(c=>c.onchange=()=>{const i=+c.dataset.unused;d.items[i].unused=c.checked;refresh(i)});
+ app.querySelectorAll('[data-same]').forEach(c=>c.onchange=()=>{const i=+c.dataset.same;d.items[i].same=c.checked;refresh(i)});
+ app.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{
+  const x=+b.dataset.day;const cur=daysOf(v,d).slice();const k=cur.indexOf(x);
+  if(k>=0)cur.splice(k,1);else cur.push(x);
+  d.days=cur.sort((a,b)=>a-b);save();b.classList.toggle('on');
+ });
+ app.querySelectorAll('[data-x]').forEach(inp=>inp.oninput=()=>{d.extra[+inp.dataset.x][inp.dataset.xk]=inp.value;save()});
+ app.querySelectorAll('[data-xdel]').forEach(b=>b.onclick=()=>{d.extra.splice(+b.dataset.xdel,1);save();renderVendor()});
+ document.getElementById('xadd').onclick=()=>{d.extra.push({name:'',unit:'',rule:''});save();renderVendor();
+  const xs=app.querySelectorAll('[data-xk="name"]');if(xs.length)xs[xs.length-1].focus()};
+}
+
+// ---------- 產生結果 ----------
+function parCell(it,e){
+ if(!it.parHoliday&&!it.parTwo)return e.par||'';
+ return '平日'+(e.par||'?')+(it.parHoliday?'/假日'+(e.hol||'?'):'')+(it.parTwo?'/兩天'+(e.two||'?'):'');
+}
+function itemLine(it,e,i){
+ const no=(i+1)+' '+it.n+':';
+ if(e.unused)return no+'不用';
+ if(!isDone(it,e))return no+'(未填)';
+ let t;
+ if(it.type==='par')t='常備 '+parCell(it,e)+' '+it.u;
+ else if(it.type==='trig')t=cmpText(it)+' '+e.th+' '+it.u+' → 叫 '+e.oq+' '+oqUnit(it);
+ else t=e.same?'照永和規則':'見備註';
+ return no+t+(has(e.note)?'(備註:'+e.note+')':'');
+}
+function buildText(){
+ const s=storeData();const now=new Date();
+ const L=['【PM Pasta 分店叫貨規則】'+DB.store,'填寫人:'+(DB.person||'(未填)')+'|'+now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate()];
+ VENDORS.forEach(v=>{
+  const d=s[v.id];L.push('','■ '+v.name+'(點貨日:'+daysOf(v,d).map(x=>DOW[x]).join('、')+')');
+  v.items.forEach((it,i)=>L.push(itemLine(it,d.items[i],i)));
+  d.extra.filter(x=>has(x.name)).forEach(x=>L.push('+ 新增 '+x.name+(has(x.unit)?'('+x.unit+')':'')+':'+(x.rule||'')));
+ });
+ return L.join('\n');
+}
+function buildWorkbook(){
+ const s=storeData();const wb=XLSX.utils.book_new();const now=new Date();
+ let done=0,total=0;
+ VENDORS.forEach(v=>{const p=progress(v,s[v.id]);done+=p.n;total+=p.total});
+ const info=[['PM Pasta 分店叫貨規則 — 手機填寫結果'],[],['店名',DB.store],['填寫人',DB.person||''],
+  ['產生時間',now.toLocaleString('zh-TW')],['完成度',done+' / '+total+' 項'],[],
+  ['說明','各廠商分頁欄位與「分店叫貨規則_填寫範本.xlsx」相同;「待釐清問題」欄寫「不用」= 這家店沒用這項;「未填」= 還沒填。']];
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(info),'填寫資訊');
+ VENDORS.forEach((v,vi)=>{
+  const d=s[v.id];
+  const rows=[[(vi+1)+' '+v.name+'  (店名:'+DB.store+';點貨日:'+daysOf(v,d).map(x=>'週'+DOW[x]).join('、')+')'],
+   ['編號','品項','規則型態','單位','常備量','觸發門檻','叫貨量','換算/備註','待釐清問題']];
+  v.items.forEach((it,i)=>{
+   const e=d.items[i];const flag=e.unused?'不用':(isDone(it,e)?'':'未填');
+   if(it.type==='par')rows.push([i+1,it.n,typeLabel(it),it.u,parCell(it,e),'—','—',e.note||'',flag]);
+   else if(it.type==='trig')rows.push([i+1,it.n,typeLabel(it),it.u,'—',has(e.th)?(it.cmp==='le'?'剩':'低於')+e.th+it.u:'',has(e.oq)?e.oq+oqUnit(it):'',e.note||'',flag]);
+   else rows.push([i+1,it.n,typeLabel(it),it.u,'—','—',e.same?'照永和規則':'見備註',e.note||'',flag]);
+  });
+  d.extra.filter(x=>has(x.name)).forEach(x=>rows.push(['新增',x.name,'',x.unit||'','','','',x.rule||'','新品項']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:6},{wch:22},{wch:14},{wch:6},{wch:16},{wch:12},{wch:12},{wch:30},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws,((vi+1)+' '+v.name).slice(0,31));
+ });
+ return wb;
+}
+function fileName(){const n=new Date();return 'PM_Pasta_'+DB.store+'_叫貨規則_'+n.getFullYear()+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+'.xlsx'}
+function xlsxBlob(){const out=XLSX.write(buildWorkbook(),{bookType:'xlsx',type:'array'});return new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+function download(){
+ const a=document.createElement('a');a.href=URL.createObjectURL(xlsxBlob());a.download=fileName();
+ document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+function copyText(txt){
+ const ok=()=>toast('已複製,貼到 LINE 就可以');
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok).catch(()=>fb());else fb();
+ function fb(){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){alert('請長按下方文字手動複製')}ta.remove()}
+}
+function renderResult(){
+ const s=storeData();
+ const miss=VENDORS.map(v=>{const d=s[v.id];const m=v.items.filter((it,i)=>!isDone(it,d.items[i])).map(it=>it.n);return{v,m}}).filter(x=>x.m.length);
+ const txt=buildText();
+ const canShare=!!(navigator.canShare&&window.File&&(()=>{try{return navigator.canShare({files:[new File(['x'],'t.xlsx')]})}catch(e){return false}})());
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">傳給管理員</div><div class="d">'+esc(DB.store)+' · 填寫人:'+esc(DB.person||'(未填)')+'</div></div></div><main>'+
+  (miss.length?'<div class="card miss"><b>還有 '+miss.reduce((a,x)=>a+x.m.length,0)+' 項沒填</b>(可以先傳,之後補):<br>'+
+   miss.map(x=>esc(x.v.name)+':'+x.m.map(esc).join('、')).join('<br>')+'</div>'
+   :'<div class="card" style="color:var(--ok);font-weight:700">✓ 全部填完了</div>')+
+  (DB.person?'':'<div class="card miss"><b>還沒填名字</b>,請回首頁填上,管理員才知道是誰填的。</div>')+
+  (canShare?'<button class="cta" id="share">📤 分享 Excel 到 LINE</button>':'')+
+  '<button class="'+(canShare?'ghost':'cta')+'" id="dl">⬇ 下載 Excel 檔</button>'+
+  '<button class="ghost" id="cp">📋 複製文字版(直接貼 LINE)</button>'+
+  '<h2>文字版預覽</h2><div class="card"><pre class="out">'+esc(txt)+'</pre></div></main>';
+ document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ if(typeof XLSX==='undefined'){['share','dl'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.textContent='Excel 元件載入失敗,請用「複製文字版」'}})}
+ const sh=document.getElementById('share');if(sh)sh.onclick=async()=>{
+  try{await navigator.share({files:[new File([xlsxBlob()],fileName(),{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})],title:'PM Pasta '+DB.store+' 叫貨規則'})}
+  catch(e){if(e&&e.name!=='AbortError')download()}
+ };
+ document.getElementById('dl').onclick=download;
+ document.getElementById('cp').onclick=()=>copyText(txt);
+}
+function render(){
+ if(S.view==='vendor'&&DB.store)renderVendor();
+ else if(S.view==='result'&&DB.store)renderResult();
+ else renderHome();
+}
+render();
+</script>
