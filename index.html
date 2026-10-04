@@ -157,11 +157,12 @@ footer{padding:8px 16px 24px;font-size:11.5px;color:var(--sub);line-height:1.7}
 
 <div class="app" id="app"></div>
 
+<script src="stores-data.js"></script>
 <script>
 // ---------- 資料(來源:PM_Pasta_永和店_叫貨規則_優化版.xlsx)----------
 // type: par=補到滿  trig=碰到設定庫存  spec=特殊(綁定/混搭)
 // th: 觸發門檻(數字,單位=stockUnit或unit)  cmp: 'lt'低於 / 'le'剩  oq: 一次叫的文字
-const VENDORS=[
+const VENDORS_YONGHE=[
  {id:'shen',name:'申崧',days:[1],red:false,note:'點貨日:週一',items:[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
@@ -312,6 +313,17 @@ const VENDORS=[
 ];
 const DOW='日一二三四五六';
 
+// ---------- 多店(2026-10-05):永和資料在上方,其他店由 stores-data.js 帶入 ----------
+// 存檔各店分開(SKEY 前綴);第一次開啟先選店,之後記住,首頁右上角可換店。
+const STORES={yonghe:{name:'永和店',vendors:VENDORS_YONGHE}};
+if(window.EXTRA_STORES)Object.assign(STORES,window.EXTRA_STORES);
+let STORE_ID=null;try{STORE_ID=localStorage.getItem('pmcount-store')}catch(e){}
+if(STORE_ID&&!STORES[STORE_ID])STORE_ID=null;
+const STORE=STORE_ID?STORES[STORE_ID]:null;
+const VENDORS=STORE?STORE.vendors:VENDORS_YONGHE; // 未選店時僅供初始化,畫面會先跳選店
+const STORE_NAME=STORE?STORE.name:'';
+const SKEY=STORE_ID?'pmcount-'+STORE_ID+'-':'pmcount-';
+
 // ---------- 年度紅字行事曆(115年官方核定版,2026 全年無補班日)----------
 // 紅字=國定假日本日+補假日(含落在週日的,如 10/25 光復節——寧可多備、不要漏訂)。
 // ⚠ 每年要換新年度行事曆;正式系統改放資料表、由 admin 在後台維護。
@@ -346,19 +358,20 @@ const S={view:'home',vid:null,person:null,
 const tomorrow=()=>(today.getDay()+1)%7;
 const isWeekendOrRed=()=>S.holiday||tomorrow()===0||tomorrow()===6; // 綠長春假日量:明天是週末或紅字→用假日量
 VENDORS.forEach(v=>{S.data[v.id]=v.items.map(()=>({stock:null,on:false,qty:''}))});
-try{const saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString()));
+try{let saved=JSON.parse(localStorage.getItem(SKEY+today.toDateString()));
+ if(!saved&&STORE_ID==='yonghe')saved=JSON.parse(localStorage.getItem('pmcount-'+today.toDateString())); // 永和沿用換版前的當天存檔,不中斷點到一半的單
  if(saved){S.person=saved.person;Object.assign(S.data,saved.data);}}catch(e){} // holiday 一律由行事曆算,不再從存檔還原(避免舊的手動切換蓋掉)
 // 品項清單有新增時,把舊存檔補齊到相同長度,避免當機
 VENDORS.forEach(v=>{const a=S.data[v.id]||[];while(a.length<v.items.length)a.push({stock:null,on:false,qty:''});S.data[v.id]=a;});
-function save(){try{localStorage.setItem('pmcount-'+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data,qm:Object.fromEntries(VENDORS.filter(x=>x.veg).map(x=>[x.id,qtyMode(x)]))}))}catch(e){};logToday()}
+function save(){try{localStorage.setItem(SKEY+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data,qm:Object.fromEntries(VENDORS.filter(x=>x.veg).map(x=>[x.id,qtyMode(x)]))}))}catch(e){};logToday()}
 // 背景紀錄:每天誰點貨(自動,寫進手機的本機儲存)
-function logbook(){try{return JSON.parse(localStorage.getItem('pmcount-log'))||{}}catch(e){return{}}}
+function logbook(){try{return JSON.parse(localStorage.getItem(SKEY+'log'))||(STORE_ID==='yonghe'?JSON.parse(localStorage.getItem('pmcount-log'))||{}:{})}catch(e){return{}}}
 function logToday(){
  if(!S.person||!S.person.trim())return;
  const lb=logbook();
  const k=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
  lb[k]={person:S.person.trim(),dow:DOW[today.getDay()]};
- try{localStorage.setItem('pmcount-log',JSON.stringify(lb))}catch(e){}
+ try{localStorage.setItem(SKEY+'log',JSON.stringify(lb))}catch(e){}
 }
 
 // ---------- 計算 ----------
@@ -380,7 +393,7 @@ function calcQty(it,stock,qm){
  }
  if(it.type==='trig'){
   const hit=it.cmp==='le'?s<=it.th:s<it.th;
-  const oq=qm==='two'?dblQty(it.oq):it.oq; // 兩天量:門檻不變,只有叫貨量 ×2(Ya Chen 2026-09-11)
+  const oq=(qm==='two'&&!it.tds)?dblQty(it.oq):it.oq; // 兩天量:門檻不變,叫貨量 ×2;tds=店家註明「兩天數量不用改」則不加倍
   return hit?{text:oq,order:true}:{text:'不用叫',order:false};
  }
  return null;
@@ -445,7 +458,7 @@ function vendorMsg(v){
  });
  if(!lines.length)return null;
  const d=(today.getMonth()+1)+'/'+today.getDate();
- let m='【PM Pasta 永和店 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
+ let m='【PM Pasta '+STORE_NAME+' 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
  const w=isOrderDay(v)?holidayWarn(v):null; // 連假預警也寫進 LINE 訊息,廠商跟店裡都看得到
  if(w)m+='\n※ 下次點貨日 '+md(w.skip)+' 遇'+w.name+'停點'+(w.resume?',下次可點:'+md(w.resume):'');
  if(v.veg){const vm=vegMode(v);if(vm.mode==='two'||vm.mode==='multi')m+='\n※ 本次為兩天量('+md(vm.rest)+' 菜商休)';}
@@ -463,14 +476,18 @@ function recentNames(){
 }
 // 每日點貨紀錄:讀出每天存下的點貨資料(最近 30 天)
 function dayRecords(){
- const out=[];
+ const seen={};// 同一天新舊 key 都有時,以新 key(含店別)優先
  for(let i=0;i<localStorage.length;i++){
-  const k=localStorage.key(i);
-  if(!k||k.indexOf('pmcount-')!==0||k==='pmcount-log')continue;
-  const d=new Date(k.slice(8));if(isNaN(d))continue;
-  try{const rec=JSON.parse(localStorage.getItem(k));if(rec&&rec.data)out.push({d,rec})}catch(e){}
+  const k=localStorage.key(i);if(!k)continue;
+  let ds=null,legacy=false;
+  if(k.indexOf(SKEY)===0)ds=k.slice(SKEY.length);
+  else if(STORE_ID==='yonghe'&&k.indexOf('pmcount-')===0){ds=k.slice(8);legacy=true;} // 換版前的永和舊紀錄
+  else continue;
+  const d=new Date(ds);if(isNaN(d))continue;
+  if(seen[d.toDateString()]&&legacy)continue;
+  try{const rec=JSON.parse(localStorage.getItem(k));if(rec&&rec.data)seen[d.toDateString()]={d,rec}}catch(e){}
  }
- return out.sort((a,b)=>b.d-a.d).slice(0,30);
+ return Object.values(seen).sort((a,b)=>b.d-a.d).slice(0,30);
 }
 function renderHistory(){
  const blocks=dayRecords().map(({d,rec})=>{
@@ -511,7 +528,7 @@ function fbUpload(f){
  try{
   const b=new URLSearchParams();
   b.append('entry.923633370',f.text);      // 問題反饋
-  b.append('entry.4187305',f.person||'沒記名字'); // 記錄人
+  b.append('entry.4187305',(STORE_NAME?STORE_NAME+'-':'')+(f.person||'沒記名字')); // 記錄人(帶店別,管理端好分辨)
   fetch(FB_FORM,{method:'POST',mode:'no-cors',body:b});
  }catch(e){}
 }
@@ -552,7 +569,8 @@ function render(){
 // 跨夜自動換日:過了 00:00 自動重新載入,開新的一張;昨天的資料自動進「每日點貨紀錄」
 setInterval(()=>{if(new Date().toDateString()!==today.toDateString())location.reload()},30000);
 function header(){
- return '<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">永和店</span><span class="proto">畫面雛形</span></header>';
+ return '<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">'+esc(STORE_NAME)+
+  ' <button id="chstore" style="border:none;background:none;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline">換店</button></span><span class="proto">畫面雛形</span></header>';
 }
 function renderHome(){
  const d=today;
@@ -607,6 +625,7 @@ function renderHome(){
   '<button class="ghost" id="tofb">🛠 系統問題與反饋紀錄</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
   '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則:每家廠商固定點貨日、隔天送達;**國定假日照常點貨**(2026-10-04 業主拍板);廠商連假有休會提前登記,系統自動停點並在前一次點貨提醒多備。津華依菜商休假自動切換平日/假日/兩天量(2026-09-11)。輸入只存在這支手機,還沒連資料庫。</footer>';
+ const cs=document.getElementById('chstore');if(cs)cs.onclick=()=>{try{localStorage.removeItem('pmcount-store')}catch(e){};location.reload()};
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
  app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
@@ -621,7 +640,7 @@ function renderVendor(){
   const pend=it.pend?' <span class="tag t-pend">'+esc(it.pend)+'</span>':'';
   const parNow=parFor(it,qm);
   const rule=it.type==='par'?((qm==='two'?'今天兩天量:補到 ':'每天補到 ')+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':''))
-   :esc(it.rule||'')+(it.type==='trig'&&qm==='two'?' → 今天兩天量:叫 '+esc(dblQty(it.oq)):'');
+   :esc(it.rule||'')+(it.type==='trig'&&qm==='two'&&!it.tds?' → 今天兩天量:叫 '+esc(dblQty(it.oq)):'');
   let mid;
   if(it.type==='spec'){
    mid='<div class="sw"><button data-sw="'+i+'" class="'+(st[i].on?'on':'')+'"></button><span>'+(st[i].on?'要叫':'不叫')+'</span></div>'+
@@ -680,5 +699,13 @@ function renderSummary(){
   function fallback(txt,cb){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb()}catch(e){alert('請長按文字手動複製')}document.body.removeChild(ta);}
  });
 }
-render();
+// 第一次開啟先選店(選一次記住;換店=首頁右上角)
+function renderStorePicker(){
+ app.innerHTML='<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">點貨台</span><span class="proto">畫面雛形</span></header>'+
+  '<main><h2>你是哪一間店?</h2>'+
+  Object.entries(STORES).map(([id,s])=>'<button class="ghost" data-st="'+id+'" style="font-size:18px;font-weight:700;padding:16px">'+esc(s.name)+'</button>').join('')+
+  '<div class="note">選一次就會記住,之後開啟直接進自己的店。選錯了沒關係,首頁右上角有「換店」。</div></main>';
+ app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('pmcount-store',b.dataset.st)}catch(e){};location.reload()});
+}
+if(STORE_ID)render();else renderStorePicker();
 </script>
