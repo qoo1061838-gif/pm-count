@@ -1,6 +1,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PM Pasta 點貨台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
 <style>
 :root{
@@ -9,6 +11,7 @@
   --ok:#2E7D46; --ok-soft:#E3F0E7; --warn:#C06A10; --warn-soft:#F8EAD8;
   --info:#3B6FB5; --info-soft:#E4ECF7; --pend:#8A6D00; --pend-soft:#F5EDCB;
   --input:#FFFFFF; --input-line:#CFC6B8;
+  --accent-strong:#C4392E; /* 應叫數字用:深色模式下比 --accent 再亮一級(UX B4) */
 }
 :root:not([data-theme="light"]){}
 @media (prefers-color-scheme: dark){
@@ -18,6 +21,7 @@
     --ok:#6FBF87; --ok-soft:#22382A; --warn:#E0993F; --warn-soft:#3E2F1B;
     --info:#82A9DB; --info-soft:#243348; --pend:#D9C05A; --pend-soft:#3B341A;
     --input:#2E2822; --input-line:#55493C;
+    --accent-strong:#FF8578;
   }
 }
 :root[data-theme="dark"]{
@@ -28,7 +32,7 @@
   --input:#2E2822; --input-line:#55493C;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:16px;line-height:1.55}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-size:16px;line-height:1.55}
 .app{max-width:440px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
 header.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 10px;display:flex;align-items:baseline;gap:10px}
 .brand{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px}
@@ -49,8 +53,8 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .day{min-width:52px;flex:1;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:7px 4px;text-align:center;font-size:11px;color:var(--sub)}
 .day b{display:block;font-size:14px;color:var(--ink)}
 .day .n{font-variant-numeric:tabular-nums;font-size:12px;margin-top:2px;display:block}
-.day.today{border-color:var(--accent);background:var(--accent-soft)}
-.day.today b{color:var(--accent)}
+.day.today{border-color:var(--accent);background:var(--accent)} /* 今天=實心,與紅字日(橘)一眼區分(UX B15) */
+.day.today b,.day.today .n{color:var(--accent-ink)}
 .people{display:flex;flex-wrap:wrap;gap:8px}
 .pinput{height:48px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);font-family:inherit;font-size:18px;font-weight:700;padding:0 14px;width:100%}
 .pinput::placeholder{color:var(--input-line);font-weight:400;font-size:15px}
@@ -79,7 +83,7 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .arrow{color:var(--sub)}
 .badge{font-size:11px;border-radius:4px;padding:1px 6px}
 .b-rest{background:var(--line);color:var(--sub)}
-.b-order{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.b-order{background:var(--info-soft);color:var(--info);font-weight:700} /* 待辦=藍;綠色留給「✓點完」避免雙義(UX B16) */
 .b-warn{background:var(--warn-soft);color:var(--warn);font-weight:700}
 .day.red{border-color:var(--warn);background:var(--warn-soft)}
 .day.red b{color:var(--warn)}
@@ -105,18 +109,24 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .fbh b{font-variant-numeric:tabular-nums}
 .fbdel{margin-left:auto;border:none;background:none;color:var(--sub);font-size:12px;cursor:pointer;font-family:inherit;padding:2px 4px}
 .fbt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+/* ---- UX 檢視修正(2026-10-05)---- */
+.t-trig{color:#9A5508} /* 亮色橘字加深到 AA 對比(UX B13) */
+@media (prefers-color-scheme: dark){ .t-trig{color:var(--warn)} }
+.lsbanner{position:sticky;top:0;z-index:20;background:var(--accent);color:#fff;font-size:13px;line-height:1.5;padding:8px 14px;text-align:center}
+.newday{position:fixed;left:12px;right:12px;bottom:14px;z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:13px 16px;font-size:15px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer}
 .cta{display:block;width:100%;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:17px;font-weight:700;padding:15px;cursor:pointer}
 .cta:disabled{opacity:.4}
 .ghost{display:block;width:100%;border:1px solid var(--input-line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;font-size:15px;padding:12px;cursor:pointer}
 /* vendor page */
 .vhead{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px}
-.back{border:none;background:none;color:var(--accent);font-size:15px;font-family:inherit;cursor:pointer;padding:4px 6px 4px 0;font-weight:700}
+.vhead>div{min-width:0;flex:1}
+.back{border:none;background:none;color:var(--accent);font-size:15px;font-family:inherit;cursor:pointer;padding:4px 6px 4px 0;font-weight:700;flex-shrink:0;white-space:nowrap} /* 返回鈕不被長副標擠爆(UX B3) */
 .vhead .t{font-weight:700;font-size:17px}
-.vhead .d{font-size:12px;color:var(--sub)}
-.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:5px}
-.itop{display:grid;grid-template-columns:minmax(0,1fr) auto max-content;align-items:center;gap:10px}
-.itop .result{justify-self:end;margin-left:0}
-.itop>input{justify-self:end}
+.vhead .d{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:6px}
+/* 兩列卡(UX 檢視 B2):品名獨立一行全寬不再折行;輸入與應叫在第二列 */
+.itop{display:flex;flex-direction:column;gap:7px}
+.irow2{display:flex;align-items:center;gap:10px;justify-content:space-between}
 .item .row1{min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
 /* 編號用 <i> 內嵌在名稱字首:名稱折行時編號不會被擠成孤行 */
 .inum{font-style:normal;font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums;font-weight:700;margin-right:6px;position:relative;top:-1px}
@@ -130,13 +140,15 @@ h2{font-size:14px;letter-spacing:.12em;color:var(--sub);font-weight:700;margin:6
 .irule{font-size:13.5px;color:var(--sub);line-height:1.55} /* 規則=輔助行:降級灰字,長文自然折行、不撐版面 */
 .row2{display:flex;align-items:center;gap:10px}
 .stock{display:flex;align-items:center;gap:0;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);overflow:hidden}
-.stock button{width:36px;height:36px;border:none;background:none;color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;font-family:inherit}
-.stock input{width:48px;height:36px;border:none;background:none;color:var(--ink);text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
+.stock.bad{border-color:var(--accent)} /* 輸入看不懂時整格標紅(UX A5) */
+.stock button{width:44px;height:44px;border:none;background:none;color:var(--accent);font-size:19px;font-weight:700;cursor:pointer;font-family:inherit} /* 44px 觸控目標,手濕/戴手套可點(UX B5) */
+.stock input{width:52px;height:44px;border:none;background:none;color:var(--ink);text-align:center;font-size:17px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
 .stock input:focus{outline:none}
-.stock input::placeholder{color:var(--input-line);font-weight:400;font-size:13px}
+.stock input::placeholder{color:var(--sub);font-weight:400;font-size:14px} /* 「還沒點」訊號要看得見(UX B14) */
 .sunit{font-size:15px;font-weight:700;color:var(--accent);padding-right:2px;white-space:nowrap}
-.result{margin-left:auto;text-align:right;font-size:11.5px;color:var(--sub);min-width:58px} /* 固定最小寬:每張卡的「應叫」欄對齊 */
-.result b{display:block;font-size:16px;line-height:1.3;color:var(--ink);white-space:nowrap}
+.result{margin-left:auto;text-align:right;font-size:12px;color:var(--sub);min-width:58px} /* 固定最小寬:每張卡的「應叫」欄對齊 */
+.result b{display:block;font-size:21px;line-height:1.25;color:var(--ink);white-space:nowrap} /* 應叫=最重要的輸出,放大(UX B4) */
+.result.order b{color:var(--accent-strong)}
 .result.order b{color:var(--accent)}
 .result.zero b{color:var(--ok)}
 .sw{display:flex;align-items:center;gap:8px;font-size:14px}
@@ -317,12 +329,23 @@ const DOW='日一二三四五六';
 // 存檔各店分開(SKEY 前綴);第一次開啟先選店,之後記住,首頁右上角可換店。
 const STORES={yonghe:{name:'永和店',vendors:VENDORS_YONGHE}};
 if(window.EXTRA_STORES)Object.assign(STORES,window.EXTRA_STORES);
+// localStorage 可用性偵測(UX A3):無痕/空間滿時要明講,不能讓店員整天白點
+let LS_OK=true;try{localStorage.setItem('pmcount-probe','1');localStorage.removeItem('pmcount-probe')}catch(e){LS_OK=false;}
+let SAVE_FAIL=false; // save() 失敗旗標,頁首顯示警告
 let STORE_ID=null;try{STORE_ID=localStorage.getItem('pmcount-store')}catch(e){}
+// localStorage 不可用時,選店改走網址 #store=xxx(reload 後仍記得,避免無限回到選店頁)
+if(!STORE_ID){const hm=location.hash.match(/store=(\w+)/);if(hm)STORE_ID=hm[1];}
 if(STORE_ID&&!STORES[STORE_ID])STORE_ID=null;
 const STORE=STORE_ID?STORES[STORE_ID]:null;
 const VENDORS=STORE?STORE.vendors:VENDORS_YONGHE; // 未選店時僅供初始化,畫面會先跳選店
 const STORE_NAME=STORE?STORE.name:'';
 const SKEY=STORE_ID?'pmcount-'+STORE_ID+'-':'pmcount-';
+// 臨時休日期格式防呆(UX A14):'2026/10/5'、'2026-10-5' 自動轉 'YYYY-MM-DD',轉不了就剔除
+function normDateStr(s){const m=String(s).trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+ return m?m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'):null;}
+Object.values(STORES).forEach(st=>st.vendors.forEach(v=>{
+ if(v.restDates)v.restDates=v.restDates.map(normDateStr).filter(Boolean);
+}));
 
 // ---------- 年度紅字行事曆(115年官方核定版,2026 全年無補班日)----------
 // 紅字=國定假日本日+補假日(含落在週日的,如 10/25 光復節——寧可多備、不要漏訂)。
@@ -348,6 +371,11 @@ function nextRed(from){ // 下一個紅字日(含天數);行事曆沒資料回 n
  for(let i=1;i<=400;i++){const d=addDays(from,i);if(isRed(d))return{d,days:i};}
  return null;
 }
+function calExpiryNote(){ // 行事曆快用完時提醒更新,避免隔年連假邏輯靜默失效(UX A20d)
+ const keys=Object.keys(RED).sort();const last=keys[keys.length-1];
+ const diff=(new Date(last)-today)/86400000;
+ return diff<45?'<br><b style="color:var(--warn)">⚠ 紅字行事曆資料只到 '+last+',請通知管理員更新下一年度行事曆。</b>':'';
+}
 
 // ---------- 狀態 ----------
 const today=new Date();
@@ -363,7 +391,31 @@ try{let saved=JSON.parse(localStorage.getItem(SKEY+today.toDateString()));
  if(saved){S.person=saved.person;Object.assign(S.data,saved.data);}}catch(e){} // holiday 一律由行事曆算,不再從存檔還原(避免舊的手動切換蓋掉)
 // 品項清單有新增時,把舊存檔補齊到相同長度,避免當機
 VENDORS.forEach(v=>{const a=S.data[v.id]||[];while(a.length<v.items.length)a.push({stock:null,on:false,qty:''});S.data[v.id]=a;});
-function save(){try{localStorage.setItem(SKEY+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data,qm:Object.fromEntries(VENDORS.filter(x=>x.veg).map(x=>[x.id,qtyMode(x)]))}))}catch(e){};logToday()}
+// 存檔含「當日快照」(UX A6):品名+庫存+當時算好的應叫一起存,
+// 之後品項清單重排/規則改版,歷史紀錄都不會錯位、也不會被新規則重算
+function buildSnap(){
+ const o={};
+ VENDORS.forEach(v=>{
+  const rows=[];
+  v.items.forEach((it,i)=>{
+   const e=S.data[v.id][i];if(!e)return;
+   if(it.type==='spec'){if(e.on)rows.push({n:it.n,spec:1,qty:e.qty||it.oq||'?',by:e.by||''});return;}
+   if(e.stock===null||String(e.stock).trim()==='')return;
+   const r=calcQty(it,e.stock,qtyMode(v));
+   rows.push({n:it.n,stock:String(e.stock),res:r?(r.invalid?'輸入看不懂':(r.order?'叫 '+r.text:'不用叫')):'—',ord:r&&r.order&&!r.invalid?1:0,by:e.by||''});
+  });
+  if(rows.length)o[v.id]={name:v.name,rows};
+ });
+ return o;
+}
+function save(){
+ try{
+  localStorage.setItem(SKEY+today.toDateString(),JSON.stringify({person:S.person,holiday:S.holiday,data:S.data,snap:buildSnap(),
+   qm:Object.fromEntries(VENDORS.filter(x=>x.veg).map(x=>[x.id,qtyMode(x)]))}));
+  SAVE_FAIL=false;
+ }catch(e){SAVE_FAIL=true;} // 存不進去要讓人知道(頁首紅條,UX A3)
+ logToday();
+}
 // 背景紀錄:每天誰點貨(自動,寫進手機的本機儲存)
 function logbook(){try{return JSON.parse(localStorage.getItem(SKEY+'log'))||(STORE_ID==='yonghe'?JSON.parse(localStorage.getItem('pmcount-log'))||{}:{})}catch(e){return{}}}
 function logToday(){
@@ -382,8 +434,10 @@ function qtyMode(v){ // 這家今天用哪一種量:normal / holiday / two
 function parFor(it,qm){return qm==='two'?(it.parTwo!=null?it.parTwo:it.par*2):(qm==='holiday'&&it.parHoliday)?it.parHoliday:it.par;}
 function calcItem(it,st,v){return calcQty(it,st.stock,qtyMode(v));}
 function calcQty(it,stock,qm){
- if(stock===null||stock==='')return null;
- const s=Number(stock); if(isNaN(s))return null;
+ if(stock===null)return null;
+ const t=String(stock).trim(); if(t==='')return null; // 貼上空白≠庫存0(UX A4)
+ const s=Number(t);
+ if(isNaN(s)||s<0)return{invalid:true,order:false,text:'請填數字'}; // 亂字/負數要標紅,不能長得跟沒填一樣(UX A4/A5)
  if(it.type==='par'){
   const par=parFor(it,qm);
   // kg 品項補到 0.1kg 精度(蒜片常備才 0.3kg,進位到整數會超叫);顆/包/罐類進位到整數
@@ -440,9 +494,9 @@ function vegNote(v,from){ // 畫面/提醒用一句話;平日回空字串
 function vendorProgress(v){
  const st=S.data[v.id];let done=0,orders=0;
  v.items.forEach((it,i)=>{
-  if(it.type==='spec'){if(st[i].on){done++;orders++}return;}
+  if(it.type==='spec'){if(st[i].on)orders++;return;} // spec 不計入 done(total 也沒它,口徑一致,UX A17)
   const r=calcItem(it,st[i],v);
-  if(r){done++;if(r.order)orders++;}
+  if(r&&!r.invalid){done++;if(r.order)orders++;} // 無效輸入不算點完
  });
  return{done,total:v.items.filter(it=>it.type!=='spec').length,orders};
 }
@@ -454,14 +508,17 @@ function vendorMsg(v){
    return;
   }
   const r=calcItem(it,st[i],v);
-  if(r&&r.order)lines.push('▸ '+it.n+' '+r.text);
+  if(r&&r.order&&!r.invalid)lines.push('▸ '+it.n+' '+r.text);
  });
  if(!lines.length)return null;
  const d=(today.getMonth()+1)+'/'+today.getDate();
- let m='【PM Pasta '+STORE_NAME+' 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
+ // 標頭帶廠商名:貼錯 LINE 群組時雙方一眼看出(UX A2)
+ let m='【PM Pasta '+STORE_NAME+'→'+v.name+' 叫貨】'+d+'('+DOW[today.getDay()]+')\n'+lines.join('\n');
  const w=isOrderDay(v)?holidayWarn(v):null; // 連假預警也寫進 LINE 訊息,廠商跟店裡都看得到
  if(w)m+='\n※ 下次點貨日 '+md(w.skip)+' 遇'+w.name+'停點'+(w.resume?',下次可點:'+md(w.resume):'');
- if(v.veg){const vm=vegMode(v);if(vm.mode==='two'||vm.mode==='multi')m+='\n※ 本次為兩天量('+md(vm.rest)+' 菜商休)';}
+ if(v.veg){const vm=vegMode(v);
+  if(vm.mode==='multi')m+='\n※ 菜商 '+md(vm.rest)+' 起連休超過兩天,以下為兩天量,請人工追加'; // 加量提醒要跟著訊息走(UX A8)
+  else if(vm.mode==='two')m+='\n※ 本次為兩天量('+md(vm.rest)+' 菜商休)';}
  if(S.person)m+='\n點貨人:'+S.person;
  return m;
 }
@@ -494,7 +551,18 @@ function renderHistory(){
   const persons=[];const addP=p=>{if(p&&p.trim()&&!persons.includes(p.trim()))persons.push(p.trim())};
   addP(rec.person);
   const vparts=[];
-  VENDORS.forEach(v=>{
+  if(rec.snap){ // 新存檔有快照:直接用當時的品名+結果,品項重排/規則改版都不會錯位(UX A6)
+   Object.values(rec.snap).forEach(sv=>{
+    const lines=sv.rows.map(r=>{
+     if(r.by)addP(r.by);
+     const by=r.by?'<span class="hby">'+esc(r.by)+'</span>':'';
+     if(r.spec)return '<div class="hitem"><span>'+esc(r.n)+'</span><span class="hres">叫 '+esc(r.qty)+'</span>'+by+'</div>';
+     return '<div class="hitem"><span>'+esc(r.n)+'</span><span class="hstock">庫存 '+esc(r.stock)+'</span><span class="hres'+(r.ord?'':' dim')+'">'+esc(r.res)+'</span>'+by+'</div>';
+    });
+    if(lines.length)vparts.push('<div class="hv"><div class="hvn">'+esc(sv.name)+'</div>'+lines.join('')+'</div>');
+   });
+  }
+  else VENDORS.forEach(v=>{
    const st=(rec.data&&rec.data[v.id])||[];
    const lines=[];
    v.items.forEach((it,i)=>{
@@ -519,42 +587,54 @@ function renderHistory(){
   '<main>'+(blocks||'<div class="card empty">還沒有任何紀錄,點過貨就會自動出現</div>')+'</main>';
  document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
 }
-// 系統問題與反饋紀錄:測試期讓同事隨手記問題/建議;每筆自動帶時間+記錄人(存本機)
-function fbList(){try{return JSON.parse(localStorage.getItem('pmcount-feedback'))||[]}catch(e){return[]}}
-function fbSave(a){try{localStorage.setItem('pmcount-feedback',JSON.stringify(a))}catch(e){}}
-// 自動回傳:送出時背景塞進管理員的 Google 表單 → 自動寫進 Google Sheet(失敗不影響本機保存)
+// 系統問題與反饋紀錄:每筆自動帶時間+記錄人;依店分開存(UX A17)
+function fbKey(){return SKEY+'feedback'}
+function fbList(){try{return JSON.parse(localStorage.getItem(fbKey()))||(STORE_ID==='yonghe'?JSON.parse(localStorage.getItem('pmcount-feedback'))||[]:[])}catch(e){return[]}}
+function fbSave(a){try{localStorage.setItem(fbKey(),JSON.stringify(a))}catch(e){}}
+// 自動回傳:送出時背景塞進管理員的 Google 表單 → Google Sheet。
+// 每筆記 up 旗標(1=已回傳/0=待重送),離線或失敗的下次開頁自動重送(UX A9)
 const FB_FORM='https://docs.google.com/forms/d/e/1FAIpQLSdj85CfukF3P0m-JRMSTdGgXlDZB74dxL1E_IqBJWUVaZasbw/formResponse';
 function fbUpload(f){
  try{
   const b=new URLSearchParams();
   b.append('entry.923633370',f.text);      // 問題反饋
-  b.append('entry.4187305',(STORE_NAME?STORE_NAME+'-':'')+(f.person||'沒記名字')); // 記錄人(帶店別,管理端好分辨)
-  fetch(FB_FORM,{method:'POST',mode:'no-cors',body:b});
- }catch(e){}
+  b.append('entry.4187305',(STORE_NAME?STORE_NAME+'-':'')+(f.person||'沒記名字')); // 記錄人(帶店別)
+  return fetch(FB_FORM,{method:'POST',mode:'no-cors',body:b}).then(()=>true).catch(()=>false);
+ }catch(e){return Promise.resolve(false);}
 }
+function fbMarkUp(t,ok){const a=fbList();const e=a.find(x=>x.t===t);if(e){e.up=ok?1:0;fbSave(a);}
+ if(S.view==='feedback')renderFeedback();}
+function fbResendPending(){fbList().filter(e=>e.up===0).forEach(e=>fbUpload(e).then(ok=>fbMarkUp(e.t,ok)));}
 function renderFeedback(){
  const list=fbList();
  const items=list.map((f,idx)=>{
   const t=new Date(f.t);
+  const st=f.up===1?'<span class="badge b-order">已回傳</span>':f.up===0?'<span class="badge b-warn">僅存本機,待重送</span>':'';
   return '<div class="fb"><div class="fbh"><b>'+(t.getMonth()+1)+'/'+t.getDate()+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+'</b>'+
-   '<span class="hby">'+esc(f.person||'沒記名字')+'</span><button class="fbdel" data-del="'+idx+'">刪除</button></div>'+
+   '<span class="hby">'+esc(f.person||'沒記名字')+'</span>'+st+'<button class="fbdel" data-del="'+idx+'">刪除</button></div>'+
    '<div class="fbt">'+esc(f.text)+'</div></div>';
  }).reverse().join('');
+ let draft='';try{draft=localStorage.getItem(SKEY+'fbdraft')||''}catch(e){}
  app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">系統問題與反饋紀錄</div><div class="d">覺得怪怪的、有建議都寫下來;送出後會<b>自動回傳給管理員</b></div></div></div>'+
   '<main><div class="card" style="display:flex;flex-direction:column;gap:10px">'+
-  '<textarea id="fbtext" class="fbta" placeholder="例:津華 24 號九層塔的應叫怪怪的 / 希望字再大一點…"></textarea>'+
+  '<textarea id="fbtext" class="fbta" placeholder="例:津華 24 號九層塔的應叫怪怪的 / 希望字再大一點…">'+esc(draft)+'</textarea>'+
   '<button class="cta" id="fbadd" style="padding:12px">送出</button></div>'+
   (items||'<div class="card empty">還沒有任何紀錄,發現問題就寫下來吧</div>')+'</main>';
  document.getElementById('bk').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
+ const ta=document.getElementById('fbtext');
+ ta.oninput=()=>{try{localStorage.setItem(SKEY+'fbdraft',ta.value)}catch(e){}}; // 打到一半的草稿保護(UX A15)
  document.getElementById('fbadd').onclick=()=>{
-  const ta=document.getElementById('fbtext');const txt=(ta.value||'').trim();
+  const txt=(ta.value||'').trim();
   if(!txt){ta.focus();return;}
-  const entry={t:new Date().toISOString(),person:(S.person||'').trim(),text:txt};
+  const entry={t:new Date().toISOString(),person:(S.person||'').trim(),text:txt,up:0};
   const a=fbList();a.push(entry);fbSave(a);
-  fbUpload(entry); // 同步自動回傳給管理員
+  try{localStorage.removeItem(SKEY+'fbdraft')}catch(e){}
+  fbUpload(entry).then(ok=>fbMarkUp(entry.t,ok)); // 回傳結果如實標記(UX A9)
   renderFeedback();window.scrollTo(0,0);
  };
  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='確定刪除?';b.style.color='var(--accent)';
+   setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='刪除';b.style.color=''}},3000);return;} // 兩段式確認(UX A20c)
   const a=fbList();a.splice(+b.dataset.del,1);fbSave(a);renderFeedback();
  });
 }
@@ -566,11 +646,30 @@ function render(){
  else renderSummary();
  save();
 }
-// 跨夜自動換日:過了 00:00 自動重新載入,開新的一張;昨天的資料自動進「每日點貨紀錄」
-setInterval(()=>{if(new Date().toDateString()!==today.toDateString())location.reload()},30000);
+// 跨夜換日:不再無預警 reload(會清掉打到一半的反饋,UX A15);
+// 改顯示橫幅讓使用者自己按,按了才開新的一天(昨天資料自動進紀錄)
+setInterval(()=>{
+ if(new Date().toDateString()!==today.toDateString()&&!document.getElementById('newday')){
+  const b=document.createElement('div');b.id='newday';b.className='newday';
+  b.textContent='🌙 已過午夜換日了——點這裡開新的一天(昨天的單已自動保存)';
+  b.onclick=()=>location.reload();
+  document.body.appendChild(b);
+ }
+},30000);
+// 同手機開兩個分頁同時點貨會互相覆蓋(UX A10):偵測到就警告
+window.addEventListener('storage',e=>{
+ if(e&&e.key===SKEY+today.toDateString()&&!document.getElementById('dupwarn')){
+  const b=document.createElement('div');b.id='dupwarn';b.className='newday';b.style.background='var(--warn)';b.style.color='#fff';
+  b.textContent='⚠ 另一個分頁/視窗也開著點貨台,請關掉其中一個,避免輸入互相覆蓋(點此關閉提醒)';
+  b.onclick=()=>b.remove();
+  document.body.appendChild(b);
+ }
+});
 function header(){
- return '<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">'+esc(STORE_NAME)+
-  ' <button id="chstore" style="border:none;background:none;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline">換店</button></span><span class="proto">畫面雛形</span></header>';
+ // 儲存異常警告(UX A3):紅條常駐,店員當下就知道紀錄不會留
+ const warn=(!LS_OK||SAVE_FAIL)?'<div class="lsbanner">⚠ 這支手機目前無法保存資料(儲存空間滿或瀏覽器限制)——仍可點貨與複製訊息,但關閉頁面後紀錄不會留存</div>':'';
+ return warn+'<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">'+esc(STORE_NAME)+
+  ' <button id="chstore" style="border:1px solid var(--input-line);background:var(--input);color:var(--info);font-size:12px;cursor:pointer;font-family:inherit;padding:3px 10px;border-radius:999px">換店</button></span><span class="proto">畫面雛形</span></header>';
 }
 function renderHome(){
  const d=today;
@@ -579,9 +678,11 @@ function renderHome(){
   const wd=addDays(wkStart,i),dw=wd.getDay();
   const n=VENDORS.filter(v=>v.days.includes(dw)&&!(v.veg&&vegMode(v,wd).mode==='none')).length;
   const red=isRed(wd);
-  return '<div class="day'+(ymd(wd)===ymd(d)?' today':'')+(red?' red':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+md(wd)+'</span><span class="n">'+(red?esc(RED[ymd(wd)]):n+' 家')+'</span></div>';
+  return '<div class="day'+(ymd(wd)===ymd(d)?' today':'')+(red?' red':'')+'"><b>'+DOW[dw]+'</b><span class="n">'+md(wd)+'</span><span class="n">'+(ymd(wd)===ymd(d)?'今天':red?esc(String(RED[ymd(wd)]).slice(0,2)):n+' 家')+'</span></div>';
  }).join('');
- const vlist=VENDORS.map(v=>{
+ // 今日要點的廠商排最上面(UX B16);組內維持原順序
+ const sortedVendors=[...VENDORS].sort((a,b)=>(isOrderDay(b)?1:0)-(isOrderDay(a)?1:0));
+ const vlist=sortedVendors.map(v=>{
   const on=isOrderDay(v);const p=vendorProgress(v);
   const sched=v.days.includes(d.getDay()); // 今天本來是它的點貨日(可能被紅字擋掉)
   const w=on?holidayWarn(v):null;
@@ -596,7 +697,6 @@ function renderHome(){
    '<div class="vnote">'+esc(v.note)+'</div>'+warnHtml+(v.veg&&vegNote(v)?'<div class="vwarn">🥬 '+esc(vegNote(v))+'</div>':'')+'</div>'+
    '<div class="vstat">'+stat+'</div><span class="arrow">›</span></div>';
  }).join('');
- const anyMsg=VENDORS.some(v=>vendorMsg(v));
  app.innerHTML=header()+'<main>'+
   '<div class="card datecard"><div class="datebig">'+(d.getMonth()+1)+'/'+d.getDate()+'</div>'+
   '<div class="dateinfo"><span class="dow">星期'+DOW[d.getDay()]+'</span><br>'+d.getFullYear()+' 年'+(todayRedName?'<br><b style="color:var(--warn)">今天:'+esc(todayRedName)+'</b>':'')+'</div>'+
@@ -609,7 +709,7 @@ function renderHome(){
   (recentNames().length?'<div class="people"><span style="font-size:13px;color:var(--sub);align-self:center">最近:</span>'+recentNames().map(p=>'<button class="chip" data-p="'+esc(p)+'">'+esc(p)+'</button>').join('')+'</div>':'')+
   '</div>'+
   '<h2>今日廠商('+VENDORS.filter(isOrderDay).length+' 家要點)</h2><div class="card" style="padding:2px 16px">'+vlist+'</div>'+
-  '<button class="cta" id="tosum" '+(anyMsg?'':'disabled')+'>產生今日叫貨訊息</button>'+
+  '<button class="cta" id="tosum">產生今日叫貨訊息</button>'+
   '<details class="guide"><summary>📖 第一次用?點我看教學</summary><div class="gbody"><ol>'+
   '<li>先在上面輸入<b>你的名字</b>,讓大家知道今天是誰點的。</li>'+
   '<li>看「今日廠商」:標<b>綠色「今日要點」</b>的就是今天要點的,點它進去。(其他家標灰色,今天不用點;真的有需要也可以點進去照叫。)</li>'+
@@ -624,8 +724,8 @@ function renderHome(){
   '</ol><div class="gtip">小提醒:這是測試版,輸入的資料<b>只存在你自己的手機</b>,別人看不到你點的、你也看不到別人的。正式系統上線後才會同步。</div></div></details>'+
   '<button class="ghost" id="tofb">🛠 系統問題與反饋紀錄</button>'+
   '<button class="ghost" id="tohist">📒 每日點貨紀錄</button>'+
-  '</main><footer>雛形說明:資料來自「永和店叫貨規則 優化版」;10 家廠商到齊(2026-08-29 津華、央廚加入)。行程規則:每家廠商固定點貨日、隔天送達;**國定假日照常點貨**(2026-10-04 業主拍板);廠商連假有休會提前登記,系統自動停點並在前一次點貨提醒多備。津華依菜商休假自動切換平日/假日/兩天量(2026-09-11)。輸入只存在這支手機,還沒連資料庫。</footer>';
- const cs=document.getElementById('chstore');if(cs)cs.onclick=()=>{try{localStorage.removeItem('pmcount-store')}catch(e){};location.reload()};
+  '</main><footer>雛形說明:各店規則來自各店主管填寫定稿。行程規則:每家廠商固定點貨日、隔天送達;<b>國定假日照常點貨</b>(2026-10-04 拍板);廠商連假有休會提前登記,系統自動停點並在前一次點貨提醒多備。津華依菜商休假自動切換平日/假日/兩天量。輸入只存在這支手機,還沒連資料庫。'+calExpiryNote()+'</footer>';
+ const cs=document.getElementById('chstore');if(cs)cs.onclick=()=>{try{localStorage.removeItem('pmcount-store')}catch(e){};location.hash='';location.reload()};
  document.getElementById('pname').oninput=e=>{S.person=e.target.value;save()};
  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.person=b.dataset.p;render()});
  app.querySelectorAll('[data-v]').forEach(r=>r.onclick=()=>{S.vid=r.dataset.v;S.view='vendor';render();window.scrollTo(0,0)});
@@ -647,18 +747,21 @@ function renderVendor(){
     (st[i].on?'<input data-q="'+i+'" value="'+esc(st[i].qty||it.oq||'')+'" placeholder="數量" style="width:90px;height:40px;border:1.5px solid var(--input-line);border-radius:10px;background:var(--input);color:var(--ink);text-align:center;font-family:inherit;font-size:15px">':'');
   }else{
    const r=calcItem(it,st[i],v);
-   const res=r===null?'<div class="result">應叫<b>—</b></div>':(r.order?'<div class="result order">應叫<b>'+esc(r.text)+'</b></div>':'<div class="result zero">應叫<b>0</b></div>');
+   const res=r===null?'<div class="result">應叫<b>—</b></div>'
+    :r.invalid?'<div class="result order">應叫<b style="font-size:13px">請填數字</b></div>' // 無效輸入要看得出來(UX A5)
+    :(r.order?'<div class="result order">應叫<b>'+esc(r.text)+'</b></div>':'<div class="result zero">應叫<b>0</b></div>');
    // 輸入單位直接標在輸入格上(紅字),避免「品項有兩種單位、不知道填哪個」
-   mid='<div class="stock"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="?" value="'+(st[i].stock===null?'':st[i].stock)+'"><span class="sunit">'+it.u+'</span><button data-a="'+i+'">＋</button></div>'+res;
+   mid='<div class="stock'+(r&&r.invalid?' bad':'')+'"><button data-m="'+i+'">−</button><input data-s="'+i+'" inputmode="decimal" placeholder="?" value="'+esc(st[i].stock===null?'':st[i].stock)+'"><span class="sunit">'+it.u+'</span><button data-a="'+i+'">＋</button></div>'+res;
   }
-  // 數字輸入的品項:單位標在輸入格,名稱旁不重複標(特殊品項沒有輸入格,單位留在名稱旁)
-  const nameUnit=it.type==='spec'?'<span class="iunit">'+it.u+'</span>':'';
-  // 編號=資料順序,與 xlsx 規則檔「編號」欄一致(調整品項順序時的對照依據)
-  return '<div class="item"><div class="itop"><div class="row1"><span class="iname"><i class="inum">'+(i+1)+'</i>'+esc(it.n)+'</span>'+nameUnit+'</div>'+mid+'</div>'+
+  // 數字輸入的品項:單位標在輸入格,名稱旁不重複標(特殊品項單位留名稱旁;「規則待補」沒單位就不顯示,UX B9)
+  const nameUnit=it.type==='spec'&&it.u?'<span class="iunit">'+it.u+'</span>':'';
+  // 兩列卡(UX B2):品名一行全寬、輸入+應叫一行,長品名不再折成孤字
+  return '<div class="item"><div class="itop"><div class="row1"><span class="iname"><i class="inum">'+(i+1)+'</i>'+esc(it.n)+'</span>'+nameUnit+'</div>'+
+   '<div class="irow2">'+mid+'</div></div>'+
    '<div class="irule">'+tag+(rule?'<span>'+rule+'</span>':'')+pend+'</div></div>';
  }).join('');
  const vw=isOrderDay(v)?holidayWarn(v):null;
- app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d">'+esc(v.note)+' · 已點 '+p.done+'/'+p.total+(isOrderDay(v)?'':' · 行程顯示今天不用點,仍可照點')+'</div>'+
+ app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d"><span id="vprog">已點 '+p.done+'/'+p.total+'</span> · '+esc(v.note)+(isOrderDay(v)?'':' · 今天不用點,可照點')+'</div>'+
   (vw?'<div class="vwarn">⚠ 下次點貨日 '+md(vw.skip)+' 遇'+esc(vw.name)+'停點,這次請多備'+(vw.resume?'到 '+md(vw.resume):'')+'</div>':'')+
   (v.veg&&vegNote(v)?'<div class="vwarn">🥬 '+esc(vegNote(v))+'</div>':'')+'</div></div>'+
   '<main><div class="note">庫存照輸入格<b style="color:var(--accent)">紅字單位</b>數;可填小數:半=0.5、1/3≈0.33</div>'+items+'</main>'+
@@ -666,8 +769,11 @@ function renderVendor(){
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
  const mark=i=>{st[i].by=(S.person||'').trim()}; // 每一筆記下是誰輸入的(多人輪流點時換名字即可)
  app.querySelectorAll('[data-s]').forEach(inp=>inp.oninput=()=>{const i=+inp.dataset.s;st[i].stock=inp.value===''?null:inp.value;mark(i);refreshVendor()});
- app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=+b.dataset.a;st[i].stock=(Number(st[i].stock)||0)+1;mark(i);render()});
- app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const i=+b.dataset.m;st[i].stock=Math.max(0,(Number(st[i].stock)||0)-1);mark(i);render()});
+ // kg 品項步進 0.1(蒜片常備才 0.3,±1 太粗,UX A20b);看不懂的輸入當 0 起跳
+ const stepOf=it=>it.u==='kg'?0.1:1;
+ const baseOf=i=>{const n=Number(String(st[i].stock||'').trim());return isNaN(n)||n<0?0:n;};
+ app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=+b.dataset.a;st[i].stock=String(Math.round((baseOf(i)+stepOf(v.items[i]))*10)/10);mark(i);render()});
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const i=+b.dataset.m;st[i].stock=String(Math.max(0,Math.round((baseOf(i)-stepOf(v.items[i]))*10)/10));mark(i);render()});
  app.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{const i=+b.dataset.sw;st[i].on=!st[i].on;mark(i);render()});
  app.querySelectorAll('[data-q]').forEach(inp=>inp.oninput=()=>{const i=+inp.dataset.q;st[i].qty=inp.value;mark(i);save()});
  function refreshVendor(){ // 更新應叫顯示但不重畫(避免輸入中斷)
@@ -675,18 +781,27 @@ function renderVendor(){
    if(it.type==='spec')return;
    const r=calcItem(it,st[i],v);
    const el=app.querySelector('[data-s="'+i+'"]');if(!el)return;
-   const res=el.closest('.itop').querySelector('.result');
+   el.closest('.stock').classList.toggle('bad',!!(r&&r.invalid)); // 標紅同步(UX A5)
+   const res=el.closest('.irow2').querySelector('.result');
    if(r===null){res.className='result';res.innerHTML='應叫<b>—</b>';}
+   else if(r.invalid){res.className='result order';res.innerHTML='應叫<b style="font-size:13px">請填數字</b>';}
    else if(r.order){res.className='result order';res.innerHTML='應叫<b>'+esc(r.text)+'</b>';}
    else{res.className='result zero';res.innerHTML='應叫<b>0</b>';}
-  });save();
+  });
+  const p2=vendorProgress(v);const vp=document.getElementById('vprog');if(vp)vp.textContent='已點 '+p2.done+'/'+p2.total; // 打字也要動進度(UX B10)
+  save();
  }
 }
 function renderSummary(){
  const blocks=VENDORS.filter(v=>isOrderDay(v)||vendorMsg(v)).map(v=>{
-  const m=vendorMsg(v);
-  return '<div class="msg"><div class="mh">'+v.name+(m?'<button class="copy" data-c="'+v.id+'">複製</button>':'')+'</div>'+
-   (m?'<pre id="pre-'+v.id+'">'+esc(m)+'</pre>':'<div class="empty">今日無需叫貨(或尚未點)</div>')+'</div>';
+  const m=vendorMsg(v);const p=vendorProgress(v);const st=S.data[v.id];
+  // 開了「要叫」卻沒填數量的特殊品項,複製前要擋(UX A12)
+  const pendSpec=v.items.some((it,i)=>it.type==='spec'&&st[i].on&&!(st[i].qty||it.oq));
+  let bodyHtml;
+  if(m)bodyHtml=(pendSpec?'<div class="empty" style="color:var(--warn);font-weight:700">⚠ 有特殊品項開了「要叫」但沒填數量,請回該廠商補好再複製</div>':'')+'<pre id="pre-'+v.id+'">'+esc(m)+'</pre>';
+  else if(p.total>0&&p.done>=p.total)bodyHtml='<div class="empty" style="color:var(--ok)">已點完,今日全部不用叫 ✓</div>'; // 「點完沒得叫」≠「忘了點」(UX B8)
+  else bodyHtml='<div class="empty" style="color:var(--warn)">⚠ 這家尚未點完('+p.done+'/'+p.total+'),請回首頁點它</div>';
+  return '<div class="msg"><div class="mh">'+v.name+(m?'<button class="copy" data-c="'+v.id+'">複製</button>':'')+'</div>'+bodyHtml+'</div>';
  }).join('');
  app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">今日叫貨訊息</div><div class="d">一家一則,複製後貼到該廠商的 LINE 群組</div></div></div>'+
   '<main>'+blocks+'<button class="ghost" id="bk2">回首頁繼續點</button></main>';
@@ -696,16 +811,25 @@ function renderSummary(){
   const ok=()=>{b.textContent='已複製 ✓';b.classList.add('done');setTimeout(()=>{b.textContent='複製';b.classList.remove('done')},2000)};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok).catch(()=>fallback(t,ok));}
   else fallback(t,ok);
-  function fallback(txt,cb){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb()}catch(e){alert('請長按文字手動複製')}document.body.removeChild(ta);}
+  // execCommand 失敗是回傳 false 不是丟例外——以前會「假裝複製成功」,店員把上一家的訊息貼錯群(UX A1)
+  function fallback(txt,cb){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);if(ok)cb();else alert('複製失敗!請長按上面的訊息文字,手動全選複製');}
  });
 }
 // 第一次開啟先選店(選一次記住;換店=首頁右上角)
 function renderStorePicker(){
+ // 分店資料載入失敗時要明講,否則分店店員會誤用永和的數字點貨(UX A7)
+ const broken=!window.EXTRA_STORES?'<div class="card" style="border-color:var(--accent);color:var(--accent);font-weight:700">⚠ 分店資料載入失敗,目前只看得到永和店。請先截圖回報管理員;分店請勿暫用永和的數字點貨!</div>':'';
+ const lsWarn=!LS_OK?'<div class="card" style="border-color:var(--warn);color:var(--warn)">⚠ 這支手機無法保存資料(無痕模式或儲存空間滿),仍可使用但紀錄不會留存。</div>':'';
  app.innerHTML='<header class="top"><span class="brand">PM <em>Pasta</em></span><span class="store">點貨台</span><span class="proto">畫面雛形</span></header>'+
-  '<main><h2>你是哪一間店?</h2>'+
-  Object.entries(STORES).map(([id,s])=>'<button class="ghost" data-st="'+id+'" style="font-size:18px;font-weight:700;padding:16px">'+esc(s.name)+'</button>').join('')+
+  '<main><h2>你是哪一間店?</h2>'+broken+lsWarn+
+  Object.entries(STORES).map(([id,s])=>'<button class="ghost" data-st="'+id+'" style="font-size:18px;font-weight:700;padding:16px;display:flex;justify-content:space-between;align-items:center"><span>'+esc(s.name)+'</span><span class="arrow">›</span></button>').join('')+
   '<div class="note">選一次就會記住,之後開啟直接進自己的店。選錯了沒關係,首頁右上角有「換店」。</div></main>';
- app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('pmcount-store',b.dataset.st)}catch(e){};location.reload()});
+ app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{
+  try{localStorage.setItem('pmcount-store',b.dataset.st)}catch(e){}
+  location.hash='store='+b.dataset.st; // localStorage 不可用時的備援(UX A3)
+  location.reload();
+ });
 }
-if(STORE_ID)render();else renderStorePicker();
+if(STORE_ID){render();fbResendPending();} // 開頁順便重送上次沒傳出去的反饋(UX A9)
+else renderStorePicker();
 </script>
