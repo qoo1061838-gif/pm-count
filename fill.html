@@ -96,31 +96,31 @@ footer{padding:8px 16px 28px;font-size:11.5px;color:var(--sub);line-height:1.7}
 <script>
 // 品項資料由 scripts/build_fill_page.py 從永和點貨網頁(點貨畫面雛形.html)自動帶入,兩邊一致
 const VENDORS=[
- {id:'shen',name:'申崧',days:[1],red:true,note:'點貨日:週一',items:[
+ {id:'shen',name:'申崧',days:[1],red:false,note:'點貨日:週一',items:[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
   {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L'},
   {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
- {id:'chang',name:'昶翔',days:[0,3],red:true,note:'點貨日:週日、週三',items:[
+ {id:'chang',name:'昶翔',days:[0,3],red:false,note:'點貨日:週日、週三',items:[
   {n:'松露油',u:'罐',type:'trig',th:1,cmp:'le',oq:'4 罐',rule:'剩1罐 → 叫4罐'},
   {n:'初榨橄欖油',u:'罐',type:'spec',oq:'1 罐',rule:'剩300ml才叫;只跟松露油同一次叫,不單獨叫(約半年一次)'},
  ]},
- {id:'wan',name:'萬堡莊',days:[2,4],red:true,note:'點貨日:週二、週四',items:[
+ {id:'wan',name:'萬堡莊',days:[2,4],red:false,note:'點貨日:週二、週四',items:[
   {n:'橄欖油',u:'罐',type:'trig',th:1,cmp:'le',oq:'1 箱',rule:'剩1罐 → 叫1箱(=4罐)'},
   {n:'松露醬(葷)',u:'罐',type:'spec',oq:'',rule:'葷+素合計一次叫6罐、可混搭;素固定留2罐,其餘補葷'},
   {n:'松露醬(素)',u:'罐',type:'spec',oq:'',rule:'固定留2罐(未開封);與葷合計6罐混搭'},
  ]},
- {id:'kai',name:'開元',days:[0,3],red:true,note:'點貨日:週日、週三(是否見紅休待確認,先當會休)',items:[
+ {id:'kai',name:'開元',days:[0,3],red:false,note:'點貨日:週日、週三',items:[
   {n:'綠長春',u:'罐',type:'par',par:18,parHoliday:30,rule:'平日補到18/紅字日補到30(上限,可微調)'},
   {n:'法國長棍',u:'包',type:'par',par:3},
  ]},
- {id:'le',name:'樂沛',days:[1,3,5],red:true,note:'點貨日:週一、週三、週五',items:[
+ {id:'le',name:'樂沛',days:[1,3,5],red:false,note:'點貨日:週一、週三、週五',items:[
   {n:'薯條(包好的)',u:'袋',type:'trig',th:2.5,cmp:'le',oq:'1 箱',rule:'剩2.5袋 → 叫1箱(=3袋)'},
   {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
  ]},
- {id:'mei',name:'美食家',days:[1],red:true,note:'點貨日:週一',items:[
+ {id:'mei',name:'美食家',days:[1],red:false,note:'點貨日:週一',items:[
   {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
   {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
   {n:'保鮮膜',u:'條',type:'par',par:2},
@@ -128,7 +128,7 @@ const VENDORS=[
   {n:'紹興酒',u:'罐',type:'par',par:3},
   {n:'黑胡椒',u:'包',type:'trig',th:0.34,cmp:'le',oq:'1 包',rule:'剩1/3才叫'},
  ]},
- {id:'bao',name:'寶綠',days:[0,4],red:true,note:'點貨日:週日、週四',items:[
+ {id:'bao',name:'寶綠',days:[0,4],red:false,note:'點貨日:週日、週四',items:[
   {n:'防油紙袋4號',u:'捆',type:'par',par:1,rule:'原名:麵包袋'},
   {n:'除油林',u:'罐',type:'par',par:1},
   {n:'大六兩袋',u:'包',type:'par',par:3},
@@ -155,7 +155,7 @@ const VENDORS=[
   {n:'我的擦手紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
   {n:'9*9玫瑰方巾紙',u:'箱',type:'trig',th:0.3,cmp:'le',oq:'1 箱',rule:'剩0.3箱 → 叫1箱'},
  ]},
- {id:'guo',name:'國豐',days:[0],red:true,note:'點貨日:週日',items:[
+ {id:'guo',name:'國豐',days:[0],red:false,note:'點貨日:週日',items:[
   {n:'粗辣椒粉',u:'包',type:'par',par:2},
   {n:'細辣椒粉',u:'包',type:'par',par:2},
   {n:'蒜頭酥',u:'包',type:'par',par:1},
