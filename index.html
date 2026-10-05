@@ -335,6 +335,7 @@ let SAVE_FAIL=false; // save() 失敗旗標,頁首顯示警告
 let STORE_ID=null;try{STORE_ID=localStorage.getItem('pmcount-store')}catch(e){}
 // localStorage 不可用時,選店改走網址 #store=xxx(reload 後仍記得,避免無限回到選店頁)
 if(!STORE_ID){const hm=location.hash.match(/store=(\w+)/);if(hm)STORE_ID=hm[1];}
+if(STORE_ID==='ckitchen'){STORE_ID='tucheng';try{localStorage.setItem('pmcount-store','tucheng')}catch(e){}} // 2026-10-05 更正:原「中央廚房」=土城店誤key
 if(STORE_ID&&!STORES[STORE_ID])STORE_ID=null;
 const STORE=STORE_ID?STORES[STORE_ID]:null;
 const VENDORS=STORE?STORE.vendors:VENDORS_YONGHE; // 未選店時僅供初始化,畫面會先跳選店
