@@ -179,7 +179,7 @@ const VENDORS_YONGHE=[
   {n:'培根',u:'包',type:'par',par:10},
   {n:'番茄罐頭',u:'罐',type:'par',par:8},
   {n:'黃金調和油',u:'罐',type:'spec',oq:'1 罐',rule:'剩約0.2罐(=500ml)才叫;1罐=2.8L'},
-  {n:'細砂糖',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於半包才叫'},
+  {n:'細砂糖',u:'包',type:'trig',th:0.1,cmp:'lt',oq:'1 包',rule:'低於0.1包才叫'},
   {n:'金山辣椒醬',u:'罐',type:'par',par:2},
  ]},
  {id:'chang',name:'昶翔',days:[0,3],red:false,note:'點貨日:週日、週三',items:[
@@ -199,7 +199,7 @@ const VENDORS_YONGHE=[
   {n:'辣味雞球',u:'包',type:'spec',oq:'1 包',rule:'低於半包才叫;巡薯條庫存時才叫、不單獨叫'},
  ]},
  {id:'mei',name:'美食家',days:[1],red:false,note:'點貨日:週一',items:[
-  {n:'耐炸油',u:'桶',type:'trig',th:0.5,cmp:'le',oq:'1 桶',rule:'剩0.5桶 → 叫1桶'},
+  {n:'耐炸油',u:'桶',type:'trig',th:0.9,cmp:'le',oq:'1 桶',rule:'剩0.9桶 → 叫1桶'},
   {n:'帕瑪森起士塊',u:'塊',type:'par',par:4},
   {n:'保鮮膜',u:'條',type:'par',par:2},
   {n:'錫箔紙',u:'條',type:'par',par:1},
@@ -212,10 +212,10 @@ const VENDORS_YONGHE=[
   {n:'大六兩袋',u:'包',type:'par',par:3},
   {n:'洗碗精',u:'箱',type:'par',par:1},
   {n:'漂白水',u:'罐',type:'par',par:1},
-  {n:'無題把半斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
-  {n:'無題把1斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
-  {n:'無題把3斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
-  {n:'無題把5斤袋',u:'捆',type:'trig',th:0.34,cmp:'le',oq:'1 捆',rule:'剩1/3才叫'},
+  {n:'無題把半斤袋',u:'捆',type:'trig',th:0.3,cmp:'le',oq:'1 捆',rule:'剩0.3捆才叫'},
+  {n:'無題把1斤袋',u:'捆',type:'trig',th:0.3,cmp:'le',oq:'1 捆',rule:'剩0.3捆才叫'},
+  {n:'無題把3斤袋',u:'捆',type:'trig',th:0.3,cmp:'le',oq:'1 捆',rule:'剩0.3捆才叫'},
+  {n:'無題把5斤袋',u:'捆',type:'trig',th:0.3,cmp:'le',oq:'1 捆',rule:'剩0.3捆才叫'},
   {n:'30斤垃圾袋',u:'捆',type:'par',par:3},
   {n:'802扁碗(空白)',u:'條',type:'par',par:12},
   {n:'PP165硬蓋',u:'條',type:'par',par:12},
@@ -247,8 +247,8 @@ const VENDORS_YONGHE=[
   {n:'玉米粉',u:'盒',type:'par',par:9},
   {n:'低筋麵粉',u:'袋',type:'par',par:1,rule:'5斤=1袋'},
   {n:'白毛巾(長)',u:'條',type:'trig',th:5,cmp:'lt',oq:'1 包',rule:'低於5條 → 叫1包(=12條)'},
-  {n:'紅藜麥',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
-  {n:'酸豆',u:'罐',type:'par',par:2},
+  {n:'紅藜麥',u:'包',type:'trig',th:0,cmp:'le',oq:'1 包',rule:'庫存歸零 → 叫1包'},
+  {n:'酸豆',u:'罐',type:'par',par:1},
   {n:'切段乾辣椒',u:'包',type:'par',par:2},
   {n:'當歸',u:'盒',type:'trig',th:0.5,cmp:'lt',oq:'1 盒',rule:'低於0.5盒才叫'},
   {n:'墨魚醬汁',u:'罐',type:'par',par:1},
@@ -259,7 +259,7 @@ const VENDORS_YONGHE=[
   {n:'安佳無鹽奶油',u:'塊',type:'par',par:6},
   {n:'可果美番茄醬',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
   {n:'番茄糊',u:'包',type:'trig',th:5,cmp:'lt',oq:'1 罐',rule:'低於5包 → 叫1罐(1罐≈15包)'},
-  {n:'原粒黑胡椒',u:'包',type:'trig',th:0.5,cmp:'lt',oq:'1 包',rule:'低於0.5包才叫'},
+  {n:'原粒黑胡椒',u:'包',type:'trig',th:0.3,cmp:'lt',oq:'1 包',rule:'低於0.3包才叫'},
   {n:'海綿菜瓜布',u:'包',type:'par',par:1},
   {n:'棕刷',u:'個',type:'par',par:3},
   {n:'Tabasco',u:'罐',type:'trig',th:0.5,cmp:'lt',oq:'1 罐',rule:'低於0.5罐才叫'},
@@ -267,48 +267,48 @@ const VENDORS_YONGHE=[
  ]},
  // restDates=菜商「臨時休」日期(如某幾個週四、或菜商有休的紅字日),Ya Chen 提前告知後加進來,格式 'YYYY-MM-DD'
  {id:'jin',name:'津華',days:[1,2,3,4,5,6],red:false,veg:true,restDow:[1],restDates:[],note:'點貨日:週一~週六(菜商固定週一休;紅字照點)',items:[
-  {n:'紅椒',u:'顆',type:'par',par:2},
-  {n:'黃椒',u:'顆',type:'par',par:2},
-  {n:'玉米筍',u:'盒',type:'par',par:8},
-  {n:'鴻禧菇',u:'包',type:'par',par:6},
-  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2,parTwo:2.8,rule:'平日1.6/假日2(週六或紅字到貨)/兩天2.8(菜商隔天休)'},
-  {n:'大陸妹',u:'kg',type:'par',par:2},
-  {n:'蘿蔓',u:'kg',type:'par',par:1},
-  {n:'蒜片',u:'kg',type:'par',par:0.3},
-  {n:'小番茄',u:'盒',type:'par',par:2},
-  {n:'擳瓜',u:'條',type:'trig',th:2,cmp:'lt',oq:'2 條',rule:'低於2條 → 叫2條'},
-  {n:'青龍椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
-  {n:'四季豆',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.2 kg',rule:'庫存歸零 → 叫0.2kg'},
-  {n:'紫洋蔥',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
-  {n:'西芹',u:'把',type:'trig',th:0.6,cmp:'lt',oq:'1 把',rule:'低於0.6把 → 叫1把'},
-  {n:'洋蔥',u:'顆',type:'trig',th:0,cmp:'le',oq:'4 顆',rule:'庫存歸零 → 叫4顆'},
-  {n:'馬鈴薯',u:'kg',type:'trig',th:0,cmp:'le',oq:'2 kg',rule:'庫存歸零 → 叫2kg'},
-  {n:'蒜苗',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.3 kg',rule:'庫存歸零 → 叫0.3kg'},
+  {n:'紅椒',u:'顆',type:'par',par:2,parTwo:3,rule:'兩天量補到3顆'},
+  {n:'黃椒',u:'顆',type:'par',par:2,parTwo:3,rule:'兩天量補到3顆'},
+  {n:'玉米筍',u:'盒',type:'par',par:8,parTwo:12,rule:'兩天量補到12盒'},
+  {n:'鴻禧菇',u:'包',type:'par',par:6,parTwo:9,rule:'兩天量補到9包'},
+  {n:'杏鮑菇',u:'kg',type:'par',par:1.6,parHoliday:2.4,parTwo:3.2,rule:'平日1.6/假日2.4(週六或紅字到貨)/兩天3.2(菜商隔天休)'},
+  {n:'大陸妹',u:'kg',type:'par',par:2.2,parTwo:3.2,rule:'兩天量補到3.2kg'},
+  {n:'蘿蔓',u:'kg',type:'par',par:1,parTwo:1.6,rule:'兩天量補到1.6kg'},
+  {n:'蒜片',u:'kg',type:'par',par:0.3,parTwo:0.3,rule:'兩天量不變'},
+  {n:'小番茄',u:'盒',type:'par',par:2,parTwo:3,rule:'兩天量補到3盒'},
+  {n:'擳瓜',u:'條',type:'par',par:2,parTwo:2,rule:'兩天量不變'},
+  {n:'青龍椒',u:'kg',type:'par',par:0.1,parTwo:0.2,rule:'兩天量補到0.2kg'},
+  {n:'四季豆',u:'kg',type:'par',par:0.1,parTwo:0.2,rule:'兩天量補到0.2kg'},
+  {n:'紫洋蔥',u:'顆',type:'trig',th:0.5,cmp:'lt',oq:'1 顆',tds:1,rule:'低於0.5顆 → 叫1顆(兩天量不變)'},
+  {n:'西芹',u:'把',type:'trig',th:0.6,cmp:'lt',oq:'1 把',tds:1,rule:'低於0.6把 → 叫1把(兩天量不變)'},
+  {n:'洋蔥',u:'顆',type:'trig',th:0,cmp:'le',oq:'4 顆',tds:1,rule:'庫存歸零 → 叫4顆(兩天量不變)'},
+  {n:'馬鈴薯',u:'kg',type:'trig',th:0,cmp:'le',oq:'2 kg',tds:1,rule:'庫存歸零 → 叫2kg(兩天量不變)'},
+  {n:'蒜苗',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.3 kg',tds:1,rule:'庫存歸零 → 叫0.3kg(兩天量不變)'},
   {n:'大辣椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.1 kg',rule:'庫存歸零 → 叫0.1kg'},
-  {n:'檸檬',u:'顆',type:'trig',th:2,cmp:'lt',oq:'2 顆',rule:'低於2顆 → 叫2顆'},
-  {n:'蒜碎',u:'包',type:'trig',th:2,cmp:'lt',oq:'2 包',rule:'低於2包 → 叫2包'},
+  {n:'檸檬',u:'顆',type:'trig',th:1,cmp:'lt',oq:'2 顆',tds:1,rule:'低於1顆 → 叫2顆(兩天量不變)'},
+  {n:'蒜碎',u:'包',type:'trig',th:2,cmp:'lt',oq:'2 包',oqTwo:'3 包',rule:'低於2包 → 叫2包(兩天量叫3包)'},
   {n:'精靈菇',u:'kg',type:'trig',th:0.6,cmp:'lt',oq:'1 kg',rule:'低於0.6kg → 叫1kg'},
   {n:'蛤蜊',u:'袋',type:'par',par:2,parTwo:3,rule:'兩天量補到3袋'},
-  {n:'小紅高',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',rule:'低於0.6顆 → 叫1顆'},
-  {n:'九層塔',u:'包',type:'trig',th:2,cmp:'lt',oq:'0.3 kg',rule:'低於2包 → 叫0.3kg(進貨後去梗打包成2包)'},
-  {n:'山藥',u:'包',type:'trig',th:4,cmp:'lt',oq:'1 條',rule:'低於4包 → 叫1條'},
-  {n:'去皮清肉(辣雞)',u:'包',type:'trig',th:6,cmp:'lt',oq:'2 kg',rule:'低於6包 → 叫2kg'},
+  {n:'小紅高',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',tds:1,rule:'低於0.6顆 → 叫1顆(兩天量不變)'},
+  {n:'九層塔',u:'包',type:'trig',th:2,cmp:'lt',oq:'0.3 kg',tds:1,rule:'低於2包 → 叫0.3kg(進貨後去梗打包成2包;兩天量不變)'},
+  {n:'山藥',u:'包',type:'trig',th:6,cmp:'lt',oq:'1 條',tds:1,rule:'低於6包 → 叫1條(兩天量不變)'},
+  {n:'去皮清肉(辣雞)',u:'包',type:'trig',th:6,cmp:'lt',oq:'2 kg',tds:1,rule:'低於6包 → 叫2kg(兩天量不變)'},
  ]},
  {id:'ck',name:'央廚',days:[0,2,4,5,6],red:false,note:'點貨日:週日、二、四、五、六(中央廚房,紅字照點)',items:[
-  {n:'160麵',u:'袋',type:'par',par:5},
-  {n:'200麵',u:'袋',type:'par',par:8},
+  {n:'160麵',u:'袋',type:'par',par:4},
+  {n:'200麵',u:'袋',type:'par',par:9},
   {n:'酸奶醬',u:'包',type:'par',par:1},
   {n:'斜管',u:'包',type:'trig',th:31,cmp:'lt',oq:'1 袋',rule:'低於31包 → 叫1袋(=20包)'},
   {n:'牛肉',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
-  {n:'青雞',u:'包',type:'trig',th:7,cmp:'lt',oq:'1 袋',rule:'低於7包 → 叫1袋(=5包)'},
+  {n:'青雞',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
   {n:'雞翅',u:'包',type:'trig',th:10,cmp:'lt',oq:'1 袋',rule:'低於10包 → 叫1袋(=20包)'},
-  {n:'古月',u:'包',type:'trig',th:3,cmp:'lt',oq:'2 包',rule:'低於3包 → 叫2包'},
+  {n:'古月',u:'包',type:'par',par:4},
   {n:'豬肉',u:'包',type:'trig',th:31,cmp:'lt',oq:'3 盒',rule:'低於31包 → 叫3盒(1盒=1kg)'},
   {n:'蝦子',u:'袋',type:'trig',th:1.6,cmp:'lt',oq:'1 袋',rule:'低於1.6袋 → 叫1袋'},
   {n:'透抽',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
   {n:'鮭魚',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
   {n:'提魚',u:'罐',type:'trig',th:0.6,cmp:'lt',oq:'1 包',rule:'低於0.6罐 → 叫1包(=2罐)'},
-  {n:'調味水-海鮮',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-海鮮',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
   {n:'調味水-辣雞',u:'包',type:'trig',th:125,cmp:'lt',oq:'1 箱',rule:'低於125包 → 叫1箱(=50包)'},
   {n:'調味水-切達',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
   {n:'調味水-白酒',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
@@ -466,7 +466,7 @@ function calcQty(it,stock,qm){
  }
  if(it.type==='trig'){
   const hit=it.cmp==='le'?s<=it.th:s<it.th;
-  const oq=(qm==='two'&&!it.tds)?dblQty(it.oq):it.oq; // 兩天量:門檻不變,叫貨量 ×2;tds=店家註明「兩天數量不用改」則不加倍
+  const oq=qm==='two'?twoOq(it):it.oq; // 兩天量:門檻不變;叫貨量見 twoOq
   return hit?{text:oq,order:true}:{text:'不用叫',order:false};
  }
  return null;
@@ -501,13 +501,18 @@ function vegMode(v,from){
  if(d1.getDay()===6||isRed(d1))return{mode:'holiday',day:d1};
  return{mode:'normal'};
 }
+// 兩天叫貨量:店家指定 oqTwo(例:蒜碎兩天量叫 3 包)> 註明「兩天數量不用改」(tds)> 預設 ×2
+function twoOq(it){return it.oqTwo||(it.tds?it.oq:dblQty(it.oq));}
 function dblQty(q){const m=String(q).match(/^([\d.]+)\s*(.*)$/);return m?(Math.round(Number(m[1])*20)/10)+' '+m[2]:q;}
 function vegNote(v,from){ // 畫面/提醒用一句話;平日回空字串
  const w=vegMode(v,from);const dd=d=>md(d)+'('+DOW[d.getDay()]+')';
  if(w.mode==='none')return '明天 '+dd(w.rest)+' 菜商休,今天不點津華';
  if(w.mode==='two')return dd(w.rest)+' 菜商休 → 今天叫兩天量(撐 '+md(w.cover)+'、'+md(w.rest)+')';
  if(w.mode==='multi')return dd(w.rest)+' 起菜商連休超過兩天,系統只算兩天量,請人工加量';
- if(w.mode==='holiday')return '明天 '+dd(w.day)+(isRed(w.day)?RED[ymd(w.day)]:'')+' 到貨 → 杏鮑菇用假日量 2kg';
+ if(w.mode==='holiday'){ // 假日量品項與數字跟著各店資料走(各店杏鮑菇假日量不同);沒有假日量品項的店不提醒
+  const hs=v.items.filter(i=>i.type==='par'&&i.parHoliday!=null&&i.parHoliday!==i.par).map(i=>i.n+'用假日量 '+i.parHoliday+i.u);
+  return hs.length?'明天 '+dd(w.day)+(isRed(w.day)?RED[ymd(w.day)]:'')+' 到貨 → '+hs.join('、'):'';
+ }
  return '';
 }
 function vendorProgress(v){
@@ -738,7 +743,7 @@ function renderHome(){
   '<li>這家點完按下面的按鈕回首頁,換下一家。</li>'+
   '<li>全部點完 → 按紅色大按鈕<b>「產生今日叫貨訊息」</b>→ 一家一則,按「複製」貼到那家廠商的 LINE 群組。</li>'+
   '<li>看到 <b>⚠ 橘色提醒</b> = 下次點貨日碰到連假、那天不能叫 → <b>今天要多叫一點</b>,撐到提醒寫的日期。</li>'+
-  '<li>津華看到 <b>🥬 提醒</b>:菜商後天休 → 系統自動改<b>兩天量</b>(補到滿 ×2、碰到門檻的叫貨量 ×2、杏鮑菇 2.8kg),照「應叫」叫就好;明天菜商休 → 今天不用點津華。</li>'+
+  '<li>津華看到 <b>🥬 提醒</b>:菜商後天休 → 系統自動改<b>兩天量</b>(各品項照店裡設定的兩天量;沒特別設定的是補到滿 ×2、碰到門檻的叫貨量 ×2),照「應叫」叫就好;明天菜商休 → 今天不用點津華。</li>'+
   '<li>想查之前點過什麼:首頁最下面「📒 每日點貨紀錄」。</li>'+
   '</ol><div class="gtip">小提醒:這是測試版,輸入的資料<b>只存在你自己的手機</b>,別人看不到你點的、你也看不到別人的。正式系統上線後才會同步。</div></div></details>'+
   '<button class="ghost" id="tofb">🛠 系統問題與反饋紀錄</button>'+
@@ -759,7 +764,7 @@ function renderVendor(){
   const pend=it.pend?' <span class="tag t-pend">'+esc(it.pend)+'</span>':'';
   const parNow=parFor(it,qm);
   const rule=it.type==='par'?((qm==='two'?'今天兩天量:補到 ':'每天補到 ')+parNow+' '+it.u+(it.rule?'('+esc(it.rule)+')':''))
-   :esc(it.rule||'')+(it.type==='trig'&&qm==='two'&&!it.tds?' → 今天兩天量:叫 '+esc(dblQty(it.oq)):'');
+   :esc(it.rule||'')+(it.type==='trig'&&qm==='two'&&twoOq(it)!==it.oq?' → 今天兩天量:叫 '+esc(twoOq(it)):'');
   let mid;
   if(it.type==='spec'){
    mid='<div class="sw"><button data-sw="'+i+'" class="'+(st[i].on?'on':'')+'"></button><span>'+(st[i].on?'要叫':'不叫')+'</span></div>'+
@@ -783,7 +788,7 @@ function renderVendor(){
  app.innerHTML='<div class="vhead"><button class="back" id="bk">‹ 首頁</button><div><div class="t">'+v.name+'</div><div class="d"><span id="vprog">已點 '+p.done+'/'+p.total+'</span> · '+esc(v.note)+(isOrderDay(v)?'':' · 今天不用點,可照點')+'</div>'+
   (vw?'<div class="vwarn">⚠ 下次點貨日 '+md(vw.skip)+' 遇'+esc(vw.name)+'停點,這次請多備'+(vw.resume?'到 '+md(vw.resume):'')+'</div>':'')+
   (v.veg&&vegNote(v)?'<div class="vwarn">🥬 '+esc(vegNote(v))+'</div>':'')+'</div></div>'+
-  '<main><div class="note">庫存照輸入格<b style="color:var(--accent)">紅字單位</b>數;可填小數:半=0.5、1/3≈0.33</div>'+items+'</main>'+
+  '<main><div class="note">庫存照輸入格<b style="color:var(--accent)">紅字單位</b>數;可填小數:半=0.5、三分之一=0.3</div>'+items+'</main>'+
   '<div class="bottom"><button class="cta" id="dn">這家點完了,回首頁</button></div>';
  document.getElementById('bk').onclick=document.getElementById('dn').onclick=()=>{S.view='home';render();window.scrollTo(0,0)};
  const mark=i=>{st[i].by=(S.person||'').trim()}; // 每一筆記下是誰輸入的(多人輪流點時換名字即可)
