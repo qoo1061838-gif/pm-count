@@ -284,10 +284,10 @@ const VENDORS_YONGHE=[
   {n:'洋蔥',u:'顆',type:'trig',th:0,cmp:'le',oq:'4 顆',tds:1,rule:'庫存歸零 → 叫4顆(兩天量不變)'},
   {n:'馬鈴薯',u:'kg',type:'trig',th:0,cmp:'le',oq:'2 kg',tds:1,rule:'庫存歸零 → 叫2kg(兩天量不變)'},
   {n:'蒜苗',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.3 kg',tds:1,rule:'庫存歸零 → 叫0.3kg(兩天量不變)'},
-  {n:'大辣椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.1 kg',rule:'庫存歸零 → 叫0.1kg'},
+  {n:'大辣椒',u:'kg',type:'trig',th:0,cmp:'le',oq:'0.1 kg',tds:1,rule:'庫存歸零 → 叫0.1kg(兩天量不變)'},
   {n:'檸檬',u:'顆',type:'trig',th:1,cmp:'lt',oq:'2 顆',tds:1,rule:'低於1顆 → 叫2顆(兩天量不變)'},
   {n:'蒜碎',u:'包',type:'trig',th:2,cmp:'lt',oq:'2 包',oqTwo:'3 包',rule:'低於2包 → 叫2包(兩天量叫3包)'},
-  {n:'精靈菇',u:'kg',type:'trig',th:0.6,cmp:'lt',oq:'1 kg',rule:'低於0.6kg → 叫1kg'},
+  {n:'精靈菇',u:'kg',type:'trig',th:0.6,cmp:'lt',oq:'1 kg',tds:1,rule:'低於0.6kg → 叫1kg(兩天量不變)'},
   {n:'蛤蜊',u:'袋',type:'par',par:2,parTwo:3,rule:'兩天量補到3袋'},
   {n:'小紅高',u:'顆',type:'trig',th:0.6,cmp:'lt',oq:'1 顆',tds:1,rule:'低於0.6顆 → 叫1顆(兩天量不變)'},
   {n:'九層塔',u:'包',type:'trig',th:2,cmp:'lt',oq:'0.3 kg',tds:1,rule:'低於2包 → 叫0.3kg(進貨後去梗打包成2包;兩天量不變)'},
@@ -304,14 +304,14 @@ const VENDORS_YONGHE=[
   {n:'雞翅',u:'包',type:'trig',th:10,cmp:'lt',oq:'1 袋',rule:'低於10包 → 叫1袋(=20包)'},
   {n:'古月',u:'包',type:'par',par:4},
   {n:'豬肉',u:'包',type:'trig',th:31,cmp:'lt',oq:'3 盒',rule:'低於31包 → 叫3盒(1盒=1kg)'},
-  {n:'蝦子',u:'袋',type:'trig',th:1.6,cmp:'lt',oq:'1 袋',rule:'低於1.6袋 → 叫1袋'},
+  {n:'蝦子',u:'袋',type:'par',par:2},
   {n:'透抽',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
   {n:'鮭魚',u:'包',type:'trig',th:8,cmp:'lt',oq:'1 袋',rule:'低於8包 → 叫1袋(=5包)'},
   {n:'提魚',u:'罐',type:'trig',th:0.6,cmp:'lt',oq:'1 包',rule:'低於0.6罐 → 叫1包(=2罐)'},
   {n:'調味水-海鮮',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
-  {n:'調味水-辣雞',u:'包',type:'trig',th:125,cmp:'lt',oq:'1 箱',rule:'低於125包 → 叫1箱(=50包)'},
+  {n:'調味水-辣雞',u:'包',type:'par',par:125,pk:50,pu:'箱',rule:'=2.5箱;一次叫整箱,1箱=50包'},
   {n:'調味水-切達',u:'包',type:'trig',th:75,cmp:'lt',oq:'1 箱',rule:'低於75包 → 叫1箱(=50包)'},
-  {n:'調味水-白酒',u:'包',type:'trig',th:100,cmp:'lt',oq:'1 箱',rule:'低於100包 → 叫1箱(=50包)'},
+  {n:'調味水-白酒',u:'包',type:'par',par:100,pk:50,pu:'箱',rule:'=2箱;一次叫整箱,1箱=50包'},
   {n:'調味水-素食',u:'包',type:'trig',th:11,cmp:'lt',oq:'1 箱',rule:'低於11包 → 叫1箱(=50包)'},
   {n:'調味水-湯料',u:'包',type:'trig',th:6,cmp:'lt',oq:'1 袋',rule:'低於6包 → 叫1袋(=10包)'},
   {n:'青醬',u:'片',type:'trig',th:9,cmp:'lt',oq:'1 袋',rule:'低於9片 → 叫1袋(=8片)'},
@@ -333,7 +333,7 @@ let SAVE_FAIL=false; // save() 失敗旗標,頁首顯示警告
 let STORE_ID=null;try{STORE_ID=localStorage.getItem('pmcount-store')}catch(e){}
 // localStorage 不可用時,選店改走網址 #store=xxx(reload 後仍記得,避免無限回到選店頁)
 if(!STORE_ID){const hm=location.hash.match(/store=(\w+)/);if(hm)STORE_ID=hm[1];}
-if(STORE_ID==='ckitchen'){STORE_ID='tucheng';try{localStorage.setItem('pmcount-store','tucheng')}catch(e){}} // 2026-10-05 更正:原「中央廚房」=土城店誤key
+if(STORE_ID==='ckitchen'){STORE_ID='tucheng';try{localStorage.setItem('pmcount-store','tucheng')}catch(e){}} // 舊代號 ckitchen 一律轉成土城(10/05 的更正照舊保留;2026-11-19 確認當時那份「中央廚房」填單其實是永和店的,見 CLAUDE.md 進行中第 0 點)
 if(STORE_ID&&!STORES[STORE_ID])STORE_ID=null;
 const STORE=STORE_ID?STORES[STORE_ID]:null;
 const VENDORS=STORE?STORE.vendors:VENDORS_YONGHE; // 未選店時僅供初始化,畫面會先跳選店
@@ -460,6 +460,10 @@ function calcQty(it,stock,qm){
  if(it.type==='par'){
   const par=parFor(it,qm);
   // kg 品項補到 0.1kg 精度(蒜片常備才 0.3kg,進位到整數會超叫);顆/包/罐類進位到整數
+  if(it.pk){ // 庫存數小單位、叫貨叫整箱(pk=一個叫貨單位有幾個、pu=叫貨單位):缺的量進位成整箱。例:調味水補到 125 包、1 箱=50 包,剩 60 包 → 叫 2 箱
+   const n=Math.max(0,Math.ceil((par-s)/it.pk-1e-9));
+   return n>0?{text:n+' '+(it.pu||it.u),order:true}:{text:'不用叫',order:false};
+  }
   const step=it.u==='kg'?0.1:1;
   const need=Math.max(0,Math.round(Math.ceil((par-s)/step-1e-9)*step*10)/10);
   return need>0?{text:need+' '+it.u,order:true}:{text:'不用叫',order:false};
